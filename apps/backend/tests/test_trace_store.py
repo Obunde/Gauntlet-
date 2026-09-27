@@ -4,7 +4,7 @@ from datetime import datetime, timezone
 from gauntlet.pipeline import trace_store
 from gauntlet.shared.schemas import AttackRecord, JudgeVerdict, RegressionRun, RunStatus
 
-NOW = datetime(2026, 9, 27, 9, 0, tzinfo=timezone.utc)
+NOW = trace_store.iso(datetime(2026, 9, 27, 9, 0, tzinfo=timezone.utc))
 
 
 def _run(run_id: str) -> RunStatus:

@@ -23,6 +23,7 @@ next-env.d.ts
 # Run data
 apps/backend/data/runs/*
 !apps/backend/data/runs/.gitkeep
+apps/backend/data/demo_checks.jsonl
 apps/backend/regression_tests/generated/*
 !apps/backend/regression_tests/generated/.gitkeep
 
