@@ -31,6 +31,7 @@ export interface RegressionResult {
 }
 
 export interface RegressResponse {
+  ran_at?: string;
   results: RegressionResult[];
   gate: "RED" | "GREEN";
 }
@@ -53,13 +54,36 @@ export interface RunStarted {
   run_id: string;
 }
 
-export interface GuardRequest {
-  hardened: boolean;
+export interface HealthResponse {
+  ok: boolean;
+  mode: "mock" | "live";
+  pipeline_ready: boolean;
 }
 
 export interface GuardResponse {
-  hardened: boolean;
-  message: string;
+  enabled: boolean;
+}
+
+export interface IssueGroup {
+  issue_id: string;
+  violated_tool: string;
+  attack_type: string;
+  severity: "critical" | "high" | "medium" | "low" | string;
+  occurrences: number;
+  max_confidence: number;
+  score: number;
+  attack_ids: string[];
+  trace_ids: string[];
+  example_prompt: string;
+  regression_test_ids: string[];
+  fixed: boolean | null;
+}
+
+export interface IssueReport {
+  run_id: string;
+  total_attacks: number;
+  total_failures: number;
+  groups: IssueGroup[];
 }
 
 export interface BrevTelemetryResponse {
@@ -78,4 +102,3 @@ export interface BrevTelemetryResponse {
   speedup_vs_cloud_api: string;
   purpose_breakdown: Record<string, number>;
 }
-

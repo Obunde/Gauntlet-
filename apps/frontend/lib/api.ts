@@ -1,5 +1,13 @@
 import runMock from "@/mocks/run_mock.json";
-import type { BrevTelemetryResponse, RegressResponse, RunStarted, RunStatus } from "./types";
+import type {
+  BrevTelemetryResponse,
+  GuardResponse,
+  HealthResponse,
+  IssueReport,
+  RegressResponse,
+  RunStarted,
+  RunStatus,
+} from "./types";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 // Frontend work must remain usable while the backend is being integrated.
@@ -26,8 +34,13 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 }
 
 export async function getPolicies(): Promise<string[]> {
-  if (USE_MOCKS) return delay().then(() => ["customer_support"]);
+  if (USE_MOCKS) return delay().then(() => ["customer_support", "financial_agent"]);
   return request<string[]>("/api/policies");
+}
+
+export async function getHealth(): Promise<HealthResponse> {
+  if (USE_MOCKS) return delay(180).then(() => ({ ok: true, mode: "mock", pipeline_ready: true }));
+  return request<HealthResponse>("/api/health");
 }
 
 export async function startRun(policy_id: string, target_url?: string): Promise<RunStarted> {
@@ -44,6 +57,44 @@ export async function getRun(runId: string, replay = false): Promise<RunStatus> 
   return request<RunStatus>(`/api/run/${runId}`);
 }
 
+export function buildIssueReport(run: RunStatus, runId?: string): IssueReport {
+  const breached = run.attacks.filter((attack) => attack.judge.succeeded);
+  return {
+    run_id: runId ?? run.run_id,
+    total_attacks: run.attacks.length,
+    total_failures: breached.length,
+    groups: breached.map((attack, index) => ({
+      issue_id: `issue-${index + 1}`,
+      violated_tool: attack.tool_calls[0] ?? (attack.judge.violated_rule ?? "unknown"),
+      attack_type: attack.attack_type,
+      severity: attack.attack_type === "unauthorized_tool_action" ? "critical" : "high",
+      occurrences: 1,
+      max_confidence: attack.judge.confidence,
+      score: Math.round(attack.judge.confidence * 100),
+      attack_ids: [attack.attack_id],
+      trace_ids: [attack.trace_id],
+      example_prompt: attack.prompt,
+      regression_test_ids: run.regression_tests
+        .filter((test) => test.source_attack_id === attack.attack_id)
+        .map((test) => test.test_id),
+      fixed: false,
+    })),
+  };
+}
+
+export async function getIssues(runId: string, replay = false, run?: RunStatus): Promise<IssueReport> {
+  if (run) return buildIssueReport(run, runId);
+  if (USE_MOCKS || replay) {
+    return delay(220).then(() => buildIssueReport(mockRun, runId));
+  }
+  try {
+    return await request<IssueReport>(`/api/run/${runId}/issues`);
+  } catch {
+    const liveRun = await getRun(runId);
+    return buildIssueReport(liveRun, runId);
+  }
+}
+
 export async function regress(runId: string): Promise<RegressResponse> {
   if (USE_MOCKS) {
     await delay(800);
@@ -55,14 +106,14 @@ export async function regress(runId: string): Promise<RegressResponse> {
   return request<RegressResponse>(`/api/run/${runId}/regress`, { method: "POST" });
 }
 
-export async function setTargetGuard(hardened: boolean): Promise<{ hardened: boolean; message: string }> {
+export async function setTargetGuard(enabled: boolean): Promise<GuardResponse> {
   if (USE_MOCKS) {
     await delay(300);
-    return { hardened, message: hardened ? "Target agent is now HARDENED (Guard ACTIVE)" : "Target agent is VULNERABLE (Guard OFF)" };
+    return { enabled };
   }
-  return request<{ hardened: boolean; message: string }>("/api/target/guard", {
+  return request<GuardResponse>("/api/target/guard", {
     method: "POST",
-    body: JSON.stringify({ hardened }),
+    body: JSON.stringify({ enabled }),
   });
 }
 
@@ -87,5 +138,3 @@ export async function getBrevTelemetry(): Promise<BrevTelemetryResponse> {
   }
   return request<BrevTelemetryResponse>("/api/brev/telemetry");
 }
-
-
