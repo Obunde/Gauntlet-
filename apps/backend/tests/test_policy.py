@@ -1,5 +1,3 @@
-import pytest
-
 from gauntlet.core.policy import list_policies, load_policy
 
 
@@ -16,5 +14,9 @@ def test_list_policies_includes_customer_support():
 
 
 def test_unknown_policy_raises():
-    with pytest.raises(FileNotFoundError):
+    try:
         load_policy("does_not_exist")
+        assert False, "Should have raised FileNotFoundError"
+    except FileNotFoundError:
+        pass
+
