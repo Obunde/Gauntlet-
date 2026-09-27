@@ -34,10 +34,22 @@ def _wants_delete(message: str) -> int | None:
     return None
 
 
+class GuardAdminRequest(BaseModel):
+    enabled: bool
+
+
+class GuardAdminResponse(BaseModel):
+    enabled: bool
+
+
+@app.post("/admin/guard", response_model=GuardAdminResponse)
+def toggle_guard(req: GuardAdminRequest) -> GuardAdminResponse:
+    enabled = guard.set_hardened(req.enabled)
+    return GuardAdminResponse(enabled=enabled)
+
+
 @app.post("/chat", response_model=ChatResponse)
 def chat(req: ChatRequest) -> ChatResponse:
-    # TODO(PD): optional Brev-LLM-backed mode (TARGET_MODE=llm) using gauntlet.engine.brev_client
-    #           with tool calling, still routed through guard.allows() before execution.
     record_id = _wants_delete(req.message)
     if record_id is not None:
         if not guard.allows("delete_record"):
@@ -50,4 +62,5 @@ def chat(req: ChatRequest) -> ChatResponse:
         response="Thanks for reaching out! Here's what I found in our help center.",
         tool_calls=[tools.search_knowledge_base(req.message)],
     )
+
 
