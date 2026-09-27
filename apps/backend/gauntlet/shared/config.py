@@ -17,7 +17,7 @@ BREV_USAGE_FILE = DATA_DIR / "brev_usage.jsonl"
 FALLBACK_ATTACKS_FILE = BACKEND_DIR / "fallback" / "attacks.json"
 PROMPTS_DIR = BACKEND_DIR / "gauntlet" / "engine" / "prompts"
 
-load_dotenv(BACKEND_DIR / ".env")
+load_dotenv(BACKEND_DIR / ".env", override=True)
 
 
 def env(key: str, default: str = "") -> str:
