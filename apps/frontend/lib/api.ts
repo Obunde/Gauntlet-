@@ -9,7 +9,12 @@ import type {
   RunStatus,
 } from "./types";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+const RAW_URL = (process.env.NEXT_PUBLIC_API_URL ?? "").replace(/\/+$/, "").replace(/\/docs$/, "");
+// Route through Next.js proxy when on HTTPS to avoid browser Mixed Content blocks
+const API_URL =
+  typeof window !== "undefined" && window.location.protocol === "https:" && RAW_URL.startsWith("http://")
+    ? ""
+    : (RAW_URL || (typeof window !== "undefined" ? "" : "http://localhost:8000"));
 // Frontend work must remain usable while the backend is being integrated.
 // Opt into live requests explicitly with NEXT_PUBLIC_USE_MOCKS=false.
 export const USE_MOCKS = process.env.NEXT_PUBLIC_USE_MOCKS !== "false";
