@@ -14,7 +14,7 @@ export default function TargetGuardSwitch() {
       const res = await setTargetGuard(newHardened);
       setHardened(res.hardened);
       setMessage(res.message);
-      setTimeout(() => setMessage(null), 3000);
+      setTimeout(() => setMessage(null), 3500);
     } catch (err) {
       setMessage(`Failed to set guard state: ${err}`);
     } finally {
@@ -23,42 +23,42 @@ export default function TargetGuardSwitch() {
   };
 
   return (
-    <div className="rounded-xl border border-white/10 bg-white/[0.025] p-4">
-      <div className="flex items-center justify-between">
+    <div className="rounded-2xl border border-white/15 bg-white/[0.03] p-5 shadow-lg">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <span className="eyebrow">TARGET SECURITY GUARD</span>
-          <h3 className="mt-1 text-sm font-bold text-white flex items-center gap-2">
-            Target Status:
+          <span className="eyebrow text-cyan-400 font-mono">TARGET SECURITY GUARD CONTROL</span>
+          <h3 className="mt-1.5 text-lg font-bold text-white flex items-center gap-3">
+            Target Security Status:
             <span
-              className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-semibold ${
+              className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-mono font-bold tracking-wide uppercase border ${
                 hardened
-                  ? "bg-emerald-500/10 text-emerald-300 border border-emerald-500/20"
-                  : "bg-rose-500/10 text-rose-300 border border-rose-500/20"
+                  ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/30 shadow-[0_0_15px_rgba(16,185,129,0.2)]"
+                  : "bg-rose-500/20 text-rose-300 border-rose-500/30 shadow-[0_0_15px_rgba(244,63,94,0.2)]"
               }`}
             >
-              <span className={`h-1.5 w-1.5 rounded-full ${hardened ? "bg-emerald-400 shadow-[0_0_8px_#34d399]" : "bg-rose-400 shadow-[0_0_8px_#f43f5e]"}`} />
+              <span className={`h-2 w-2 rounded-full ${hardened ? "bg-emerald-400 shadow-[0_0_8px_#34d399]" : "bg-rose-400 shadow-[0_0_8px_#f43f5e]"}`} />
               {hardened ? "HARDENED (Protected)" : "VULNERABLE (Default)"}
             </span>
           </h3>
-          <p className="mt-1 text-xs text-slate-400">
+          <p className="mt-1.5 text-sm text-slate-300">
             {hardened
-              ? "Security guard is ACTIVE. Forbidden tools are blocked, forcing gate to turn GREEN."
-              : "Security guard is OFF. Vulnerable to prompt injections and forbidden tool calls."}
+              ? "Security guard is ACTIVE. Forbidden tool calls are intercepted and blocked, turning release gate GREEN."
+              : "Security guard is OFF. Vulnerable to prompt injections and unauthorized delete_record tool execution."}
           </p>
         </div>
         <button
           onClick={() => toggleGuard(!hardened)}
           disabled={loading}
-          className={`shrink-0 rounded-lg px-3.5 py-2 text-xs font-bold transition-all shadow-md ${
+          className={`shrink-0 rounded-xl px-5 py-3 text-sm font-bold transition-all shadow-lg hover:scale-105 active:scale-95 ${
             hardened
-              ? "bg-rose-500/20 text-rose-200 border border-rose-500/30 hover:bg-rose-500/30"
-              : "bg-emerald-500/20 text-emerald-200 border border-emerald-500/30 hover:bg-emerald-500/30"
+              ? "bg-rose-500/20 text-rose-200 border border-rose-500/40 hover:bg-rose-500/30 shadow-rose-950/50"
+              : "bg-emerald-500/20 text-emerald-200 border border-emerald-500/40 hover:bg-emerald-500/30 shadow-emerald-950/50"
           }`}
         >
-          {loading ? "Updating..." : hardened ? "Disable Guard (Make Vulnerable)" : "Enable Guard (Harden Target)"}
+          {loading ? "Updating Status..." : hardened ? "Disable Guard (Make Vulnerable)" : "Enable Guard (Harden Target)"}
         </button>
       </div>
-      {message && <p className="mt-3 text-xs font-mono text-cyan-300 animate-fade-in">{message}</p>}
+      {message && <p className="mt-3.5 text-sm font-mono font-semibold text-cyan-300 animate-fade-in bg-cyan-950/40 p-2.5 rounded-lg border border-cyan-500/20">{message}</p>}
     </div>
   );
 }
