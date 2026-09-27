@@ -34,28 +34,56 @@
   --danger-surface: rgba(220, 38, 38, 0.08);
 }
 
+/* Comprehensive Theme Overrides for Light & Dark Modes */
+[data-theme="light"] {
+  color-scheme: light;
+  --background: #f8fafc;
+  --surface: #ffffff;
+  --surface-raised: #f1f5f9;
+  --border: #cbd5e1;
+  --border-strong: #94a3b8;
+  --text: #0f172a;
+  --muted: #334155;
+  --subtle: #64748b;
+  --success: #059669;
+  --success-surface: rgba(16, 185, 129, 0.1);
+  --danger: #e11d48;
+  --danger-surface: rgba(244, 63, 94, 0.1);
+}
+
+/* Light Theme Component & Utility Class Overrides */
 html[data-theme="light"] body {
   background-color: #f8fafc !important;
   background-image:
-    radial-gradient(circle at 75% -10%, rgba(14, 165, 233, 0.12), transparent 36rem),
-    radial-gradient(circle at 18% 58%, rgba(59, 130, 246, 0.08), transparent 32rem) !important;
+    radial-gradient(circle at 75% -10%, rgba(14, 165, 233, 0.1), transparent 36rem),
+    radial-gradient(circle at 18% 58%, rgba(59, 130, 246, 0.06), transparent 32rem) !important;
+  color: #0f172a !important;
+}
+
+html[data-theme="light"] main,
+html[data-theme="light"] header,
+html[data-theme="light"] aside {
+  background-color: #ffffff !important;
+  border-color: #e2e8f0 !important;
   color: #0f172a !important;
 }
 
 html[data-theme="light"] .panel,
-html[data-theme="light"] .surface {
+html[data-theme="light"] .surface,
+html[data-theme="light"] .surface-raised {
   background-color: #ffffff !important;
   border-color: #cbd5e1 !important;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05) !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04) !important;
   color: #0f172a !important;
 }
 
+/* Light Mode Input Controls & Labels */
 html[data-theme="light"] .field-control,
 html[data-theme="light"] input,
 html[data-theme="light"] select,
 html[data-theme="light"] textarea {
   background-color: #ffffff !important;
-  border-color: #94a3b8 !important;
+  border: 1.5px solid #94a3b8 !important;
   color: #0f172a !important;
 }
 
@@ -65,21 +93,30 @@ html[data-theme="light"] textarea::placeholder {
 }
 
 html[data-theme="light"] .field-control:focus,
-html[data-theme="light"] input:focus {
+html[data-theme="light"] input:focus,
+html[data-theme="light"] select:focus {
   border-color: #0284c7 !important;
   box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.2) !important;
 }
 
 html[data-theme="light"] .field-label {
   color: #1e293b !important;
+  font-weight: 700 !important;
 }
 
+/* Light Mode Typography & Color Contrast */
 html[data-theme="light"] h1,
 html[data-theme="light"] h2,
 html[data-theme="light"] h3,
 html[data-theme="light"] h4,
+html[data-theme="light"] h5,
+html[data-theme="light"] h6,
 html[data-theme="light"] strong {
   color: #0f172a !important;
+}
+
+html[data-theme="light"] p {
+  color: #334155 !important;
 }
 
 html[data-theme="light"] .text-white,
@@ -93,13 +130,58 @@ html[data-theme="light"] .text-slate-400 {
   color: #334155 !important;
 }
 
-html[data-theme="light"] .panel,
-html[data-theme="light"] .surface,
-html[data-theme="light"] .surface-raised,
-html[data-theme="light"] aside,
-html[data-theme="light"] header {
-  background-color: #ffffff !important;
+html[data-theme="light"] .text-cyan-300,
+html[data-theme="light"] .text-cyan-400 {
+  color: #0284c7 !important;
+}
+
+html[data-theme="light"] .text-emerald-300,
+html[data-theme="light"] .text-emerald-400 {
+  color: #059669 !important;
+}
+
+html[data-theme="light"] .text-rose-300,
+html[data-theme="light"] .text-rose-400 {
+  color: #e11d48 !important;
+}
+
+/* Light Mode Utility Background Classes Overrides */
+html[data-theme="light"] [class*="bg-[#0"],
+html[data-theme="light"] [class*="bg-[#1"],
+html[data-theme="light"] [class*="bg-black/"],
+html[data-theme="light"] [class*="bg-slate-900"],
+html[data-theme="light"] [class*="bg-slate-950"] {
+  background-color: #f8fafc !important;
+  border-color: #cbd5e1 !important;
   color: #0f172a !important;
+}
+
+/* Light Mode Borders */
+html[data-theme="light"] [class*="border-white/"] {
+  border-color: #cbd5e1 !important;
+}
+
+/* Light Mode Buttons */
+html[data-theme="light"] .primary-button {
+  background-color: #0284c7 !important;
+  border-color: #0284c7 !important;
+  color: #ffffff !important;
+}
+
+html[data-theme="light"] .primary-button:hover {
+  background-color: #0369a1 !important;
+  border-color: #0369a1 !important;
+}
+
+html[data-theme="light"] .secondary-button {
+  background-color: #ffffff !important;
+  border-color: #cbd5e1 !important;
+  color: #1e293b !important;
+}
+
+html[data-theme="light"] .secondary-button:hover {
+  background-color: #f1f5f9 !important;
+  border-color: #94a3b8 !important;
 }
 
 * {
