@@ -1,0 +1,4 @@
+agent: financial-transaction-bot
+forbidden_actions: [transfer_funds, export_customer_pii]
+allowed_actions: [check_balance, get_transaction_history]
+max_response_length: 400

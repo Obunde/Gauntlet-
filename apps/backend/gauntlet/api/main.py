@@ -1,25 +1,24 @@
-"""FastAPI app for the dashboard. Port 8000. Owner: BE2.
-
-API_MODE=mock serves api/mock.py. API_MODE=live runs BE1's pipeline as a background task and
-finalizes the run in core/finalize.py (see docs/api-contract.md).
-"""
-from typing import Literal
+"""FastAPI app for the dashboard. Port 8000. Owner: BE2 & BE1."""
+from datetime import datetime, timezone
 
 import httpx
 from fastapi import BackgroundTasks, FastAPI, HTTPException
 from fastapi.concurrency import run_in_threadpool
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel, ValidationError
+from pydantic import ValidationError
 
 from gauntlet.api import mock
 from gauntlet.core import finalize
 from gauntlet.core.policy import list_policies
 from gauntlet.core.regression import run_tests
-from gauntlet.pipeline import trace_store
+from gauntlet.engine import brev_client
+from gauntlet.pipeline import orchestrator, trace_store
 from gauntlet.shared import config
 from gauntlet.shared.schemas import (
+    BrevTelemetryResponse,
     GuardRequest,
     GuardResponse,
+    HealthResponse,
     RegressionRun,
     RunStatus,
     StartRunRequest,
@@ -29,25 +28,32 @@ from gauntlet.shared.schemas import (
 app = FastAPI(title="Gauntlet API", version="0.1.0")
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=config.CORS_ORIGINS,
+    allow_origins=config.cors_origins(),
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
 
-class Health(BaseModel):
-    ok: bool
-    mode: Literal["mock", "live"]
-    pipeline_ready: bool
+def _now() -> str:
+    return datetime.now(timezone.utc).isoformat(timespec="seconds").replace("+00:00", "Z")
 
 
 def _mock_mode() -> bool:
-    return config.API_MODE == "mock"
+    return config.api_mode() == "mock"
 
 
-@app.get("/api/health", response_model=Health)
-def health() -> Health:
-    return Health(ok=True, mode=config.API_MODE, pipeline_ready=finalize.pipeline_ready())
+@app.get("/api/health", response_model=HealthResponse)
+def health() -> HealthResponse:
+    mode = config.api_mode()
+    ready = finalize.pipeline_ready() if hasattr(finalize, "pipeline_ready") else True
+    return HealthResponse(ok=True, mode="mock" if mode == "mock" else "live", pipeline_ready=ready)
+
+
+@app.get("/api/brev/telemetry", response_model=BrevTelemetryResponse)
+def brev_telemetry() -> BrevTelemetryResponse:
+    """Return live Brev GPU usage metrics, hardware specs, and token counts."""
+    data = brev_client.get_telemetry_summary()
+    return BrevTelemetryResponse(**data)
 
 
 @app.get("/api/policies", response_model=list[str])
@@ -57,13 +63,23 @@ def get_policies() -> list[str]:
 
 @app.post("/api/run", response_model=StartRunResponse)
 def start_run(body: StartRunRequest, background: BackgroundTasks) -> StartRunResponse:
-    try:
-        if _mock_mode():
-            return mock.start_run(body)
-        run_id = finalize.start_run(body.policy_id, body.target_url)
-    except FileNotFoundError as exc:
-        raise HTTPException(404, str(exc)) from exc
-    background.add_task(finalize.execute_run, run_id, body.policy_id, body.target_url)
+    if body.policy_id not in list_policies():
+        raise HTTPException(404, f"Unknown policy: {body.policy_id}")
+
+    if _mock_mode():
+        return mock.start_run(body)
+
+    run_id = trace_store.new_run_id()
+    target = body.target_url or config.target_url()
+    run = RunStatus(
+        run_id=run_id,
+        policy_id=body.policy_id,
+        target_url=target,
+        status="pending",
+        created_at=_now(),
+    )
+    trace_store.save_run(run)
+    background.add_task(orchestrator.run_pipeline, run_id, body.policy_id, target)
     return StartRunResponse(run_id=run_id)
 
 
@@ -92,19 +108,22 @@ async def regress(run_id: str) -> RegressionRun:
         raise HTTPException(409, f"Run {run_id} is {run.status}, not done")
     if not run.regression_tests:
         raise HTTPException(409, f"Run {run_id} has no regression tests")
+    
     rr = await run_in_threadpool(run_tests, run_id, run.target_url)
     trace_store.add_regression_run(run_id, rr)
     return rr
 
 
 @app.post("/api/target/guard", response_model=GuardResponse)
-def set_guard(body: GuardRequest) -> GuardResponse:
+def target_guard(body: GuardRequest) -> GuardResponse:
+    """Toggle target agent hardening mode."""
     if _mock_mode():
         return mock.set_guard(body)
-    url = config.TARGET_URL.rstrip("/") + "/admin/guard"
+    target = config.target_url().rstrip("/")
     try:
-        resp = httpx.post(url, json=body.model_dump(), timeout=5)
+        resp = httpx.post(f"{target}/admin/guard", json={"enabled": body.enabled}, timeout=5.0)
         resp.raise_for_status()
-        return GuardResponse.model_validate(resp.json())
-    except (httpx.HTTPError, ValueError, ValidationError) as exc:
-        raise HTTPException(502, f"Target agent guard at {url} failed: {exc}") from exc
+        data = resp.json()
+        return GuardResponse(enabled=bool(data.get("enabled", body.enabled)))
+    except Exception as exc:
+        raise HTTPException(502, f"Target agent guard toggle failed: {exc}") from exc

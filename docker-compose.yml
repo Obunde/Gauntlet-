@@ -1,0 +1,31 @@
+services:
+  backend:
+    build:
+      context: ./apps/backend
+      dockerfile: Dockerfile
+    container_name: gauntlet-backend
+    ports:
+      - "8000:8000"
+    environment:
+      - BREV_BASE_URL=${BREV_BASE_URL:-http://localhost:11435/v1}
+      - BREV_API_KEY=${BREV_API_KEY:-ollama}
+      - BREV_MODEL=${BREV_MODEL:-llama3.1}
+      - TARGET_URL=http://target-agent:8001
+      - HARDENED=0
+      - API_MODE=live
+    volumes:
+      - ./apps/backend/data:/app/data
+      - ./apps/backend/regression_tests:/app/regression_tests
+    depends_on:
+      - target-agent
+
+  target-agent:
+    build:
+      context: ./apps/backend
+      dockerfile: Dockerfile
+    container_name: gauntlet-target-agent
+    command: uvicorn target_agent.app:app --host 0.0.0.0 --port 8001
+    ports:
+      - "8001:8001"
+    environment:
+      - HARDENED=0
