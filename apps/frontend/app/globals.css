@@ -20,18 +20,87 @@
 
 [data-theme="light"] {
   color-scheme: light;
-  --background: #fafafa;
+  --background: #f8fafc;
   --surface: #ffffff;
-  --surface-raised: #f4f4f5;
-  --border: #e4e4e7;
-  --border-strong: #d4d4d8;
-  --text: #09090b;
-  --muted: #52525b;
-  --subtle: #71717a;
+  --surface-raised: #f1f5f9;
+  --border: #cbd5e1;
+  --border-strong: #94a3b8;
+  --text: #0f172a;
+  --muted: #475569;
+  --subtle: #64748b;
   --success: #16a34a;
   --success-surface: rgba(22, 163, 74, 0.08);
   --danger: #dc2626;
   --danger-surface: rgba(220, 38, 38, 0.08);
+}
+
+html[data-theme="light"] body {
+  background-color: #f8fafc !important;
+  background-image:
+    radial-gradient(circle at 75% -10%, rgba(14, 165, 233, 0.12), transparent 36rem),
+    radial-gradient(circle at 18% 58%, rgba(59, 130, 246, 0.08), transparent 32rem) !important;
+  color: #0f172a !important;
+}
+
+html[data-theme="light"] .panel,
+html[data-theme="light"] .surface {
+  background-color: #ffffff !important;
+  border-color: #cbd5e1 !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05) !important;
+  color: #0f172a !important;
+}
+
+html[data-theme="light"] .field-control,
+html[data-theme="light"] input,
+html[data-theme="light"] select,
+html[data-theme="light"] textarea {
+  background-color: #ffffff !important;
+  border-color: #94a3b8 !important;
+  color: #0f172a !important;
+}
+
+html[data-theme="light"] input::placeholder,
+html[data-theme="light"] textarea::placeholder {
+  color: #64748b !important;
+}
+
+html[data-theme="light"] .field-control:focus,
+html[data-theme="light"] input:focus {
+  border-color: #0284c7 !important;
+  box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.2) !important;
+}
+
+html[data-theme="light"] .field-label {
+  color: #1e293b !important;
+}
+
+html[data-theme="light"] h1,
+html[data-theme="light"] h2,
+html[data-theme="light"] h3,
+html[data-theme="light"] h4,
+html[data-theme="light"] strong {
+  color: #0f172a !important;
+}
+
+html[data-theme="light"] .text-white,
+html[data-theme="light"] .text-slate-100,
+html[data-theme="light"] .text-slate-200 {
+  color: #0f172a !important;
+}
+
+html[data-theme="light"] .text-slate-300,
+html[data-theme="light"] .text-slate-400 {
+  color: #334155 !important;
+}
+
+html[data-theme="light"] .bg-[#050810],
+html[data-theme="light"] .bg-[#080b12]/95,
+html[data-theme="light"] .bg-[#080b12]/80,
+html[data-theme="light"] .bg-[#0b0f18],
+html[data-theme="light"] .bg-[#0c101a]/90,
+html[data-theme="light"] .bg-[#101521]/95 {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
 }
 
 * {
