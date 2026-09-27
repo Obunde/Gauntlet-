@@ -5,7 +5,7 @@
 [![Event](https://img.shields.io/badge/Hackathon-GOMYCODE_%22Come_Build_with_AI%22_2026-6366f1.svg)](https://hackathon.gomycode.com)
 [![NVIDIA Brev Engine](https://img.shields.io/badge/Engine-NVIDIA_Brev_GPU-76B900.svg?logo=nvidia&logoColor=white)](https://brev.dev)
 [![OWASP LLM Top 10](https://img.shields.io/badge/OWASP-LLM%20Top%2010-red.svg)](https://owasp.org/www-project-top-10-for-large-language-model-applications/)
-[![Python 3.11+](https://img.shields.io/badge/Python-3.11+-3776AB.svg?logo=python&logoColor=white)](https://python.org)
+[![Python 3.10+](https://img.shields.io/badge/Python-3.10+-3776AB.svg?logo=python&logoColor=white)](https://python.org)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.110+-009688.svg?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
 [![Next.js 14](https://img.shields.io/badge/Next.js-14.2+-000000.svg?logo=next.js&logoColor=white)](https://nextjs.org)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
@@ -55,7 +55,7 @@ graph TD
         BrevLogger["Token & Latency Logger (brev_usage.jsonl)"]
     end
 
-    subgraph "Target Application (Port 8001)"
+    subgraph "Target Application Sandbox"
         TargetApp["Target AI Agent (e.g., Customer Support)"]
         GuardModule["Dynamic Hardening / Guard Module"]
     end
@@ -76,7 +76,35 @@ graph TD
 
 ---
 
-### 2. Multi-Agent Red-Teaming Execution Flow
+### 2. Distributed Multi-Instance Deployment on NVIDIA Brev
+
+```mermaid
+flowchart TD
+    subgraph "Brev GPU Control Instance (mechanical-chocolate-wolf)"
+        GPU["NVIDIA L40S 48GB Tensor Core GPU"]
+        API_Control["Gauntlet Control API (Port 8000)"]
+        BrevEngine["Multi-Threaded Attacker & Hybrid Judge LLMs"]
+    end
+
+    subgraph "Brev Candidate Agent Instance (openclaw-6d9d7d)"
+        Target_Agent["Candidate Target Agent Sandbox"]
+        Public_HTTPS["https://openclaw-33zc8iscj.gobrev.dev"]
+    end
+
+    subgraph "Client / Dashboard"
+        Frontend["Next.js Dashboard (Port 3000 / Vercel)"]
+    end
+
+    Frontend -->|1. POST /api/run| API_Control
+    API_Control -->|2. Generate Probes| BrevEngine
+    API_Control -->|3. HTTPS Security Scan| Public_HTTPS
+    Public_HTTPS --> Target_Agent
+    API_Control -->|4. Return RED/GREEN Gate| Frontend
+```
+
+---
+
+### 3. Multi-Agent Red-Teaming Execution Flow
 
 ```mermaid
 sequenceDiagram
@@ -84,17 +112,17 @@ sequenceDiagram
     participant UI as Next.js Dashboard
     participant API as Gauntlet API (Port 8000)
     participant Engine as Brev Red-Team Engine
-    participant Target as Target Agent (Port 8001)
+    participant Target as Target Agent (openclaw-6d9d7d)
     participant Store as Trace Store
 
-    UI->>API: POST /api/run {policy_id: "financial_agent"}
+    UI->>API: POST /api/run {policy_id: "financial_agent", target_url: "https://openclaw-33zc8iscj.gobrev.dev"}
     API-->>UI: 200 OK {run_id: "run_20260927_001"}
     
-    par Red-Teaming Loop
+    par Parallel Red-Teaming Loop (ThreadPoolExecutor)
         API->>Engine: Generate OWASP Attack Vectors (Attacker LLM)
         Engine-->>API: Yield Probes (Prompt Injection, Tool Bypass, PII Leak)
         
-        loop For Each Attack Vector
+        loop For Each Attack Vector (Parallel Threads)
             API->>Target: POST /chat {prompt}
             Target-->>API: Return Response & Tool Executions
             API->>Engine: Audit Response (Hybrid Rule + Judge LLM)
@@ -112,28 +140,6 @@ sequenceDiagram
 
     UI->>API: GET /api/run/run_20260927_001
     API-->>UI: Return Full Attack Graph & Security Gate Verdict
-```
-
----
-
-### 3. NVIDIA Brev Telemetry & Compute Pipeline
-
-```mermaid
-flowchart LR
-    subgraph "Brev Cloud Instance (mechanical-chocolate-wolf)"
-        GPU["NVIDIA L40S 48GB GPU"]
-        ModelStack["NVIDIA Nemotron-4 / Llama-3.1 70B"]
-        PortFwd["Port Forward (11435:11434)"]
-    end
-
-    subgraph "Backend Telemetry Engine"
-        UsageLogger["data/brev_usage.jsonl"]
-        TelemetryAPI["GET /api/brev/telemetry"]
-    end
-
-    PortFwd -->|OpenAI Bridge| UsageLogger
-    UsageLogger --> TelemetryAPI
-    TelemetryAPI -->|Live JSON Stream| UI["Frontend Dashboard Gauge"]
 ```
 
 ---
@@ -172,64 +178,43 @@ Gauntlet directly addresses the **OWASP Top 10 for LLM Applications**:
 
 ---
 
-## 🚀 Quickstart & Installation
+## 🚀 Quickstart & Deployment
 
-### Prerequisites
-- **Docker & Docker Compose** (or Podman)
-- **Python 3.11+**
-- **Node.js 18+** (for frontend)
-- **NVIDIA Brev CLI** (for live Brev GPU access)
+### 1. Multi-Instance Deployment on NVIDIA Brev
+
+#### Instance 1: GPU Security Gate (`mechanical-chocolate-wolf` - NVIDIA L40S 48GB GPU)
+```bash
+brev shell mechanical-chocolate-wolf
+git clone https://github.com/Obunde/Gauntlet-.git && cd Gauntlet-/apps/backend
+git checkout be1-engine
+python3 -m venv venv && source venv/bin/activate && pip install -e .
+nohup python3 -m uvicorn gauntlet.api.main:app --host 0.0.0.0 --port 8000 > backend.log 2>&1 &
+```
+
+#### Instance 2: Candidate Target Agent (`openclaw-6d9d7d` - 4 CPUs, 16GB RAM)
+```bash
+brev shell openclaw-6d9d7d
+git clone https://github.com/Obunde/Gauntlet-.git && cd Gauntlet-/apps/backend
+git checkout be1-engine
+python3 -m venv venv && source venv/bin/activate && pip install -e .
+nohup python3 -m uvicorn target_agent.app:app --host 0.0.0.0 --port 18789 > target.log 2>&1 &
+```
+
+#### Local Port Forwarding (Laptop Terminal)
+```bash
+brev port-forward mechanical-chocolate-wolf -p 8000:8000
+```
 
 ---
 
-### Option A: Running via Docker Compose (Recommended)
+### 2. Docker Compose Deployment (Monorepo Container Stack)
 
-1. **Clone Repository**:
-   ```bash
-   git clone git@github.com:Obunde/Gauntlet-.git
-   cd Gauntlet-
-   ```
-
-2. **Launch Services**:
-   ```bash
-   docker compose up --build
-   ```
-
-3. **Access Services**:
-   - **Frontend Dashboard**: [http://localhost:3000](http://localhost:3000)
-   - **Gauntlet Control API**: [http://localhost:8000/docs](http://localhost:8000/docs)
-   - **Target Application**: [http://localhost:8001/docs](http://localhost:8001/docs)
-
----
-
-### Option B: Local Development (NVIDIA Brev GPU Connected)
-
-1. **Start Brev Tunnel**:
-   ```bash
-   brev port-forward mechanical-chocolate-wolf -p 11435:11434
-   ```
-
-2. **Backend Setup**:
-   ```bash
-   cd apps/backend
-   pip install -r requirements.txt
-   
-   # Start in LIVE mode (connected to Brev GPU)
-   API_MODE=live BREV_BASE_URL=http://localhost:11435/v1 python3 -m uvicorn gauntlet.api.main:app --reload --port 8000
-   ```
-
-3. **Target Agent Setup**:
-   ```bash
-   cd apps/backend
-   python3 -m uvicorn target_agent.app:app --reload --port 8001
-   ```
-
-4. **Frontend Setup**:
-   ```bash
-   cd apps/frontend
-   npm install
-   npm run dev
-   ```
+```bash
+docker compose up --build
+```
+- **Frontend**: [http://localhost:3000](http://localhost:3000)
+- **Gauntlet Control API**: [http://localhost:8000/docs](http://localhost:8000/docs)
+- **Target Application**: [http://localhost:8001/docs](http://localhost:8001/docs)
 
 ---
 
@@ -253,71 +238,19 @@ Gauntlet directly addresses the **OWASP Top 10 for LLM Applications**:
   "provider": "NVIDIA Brev Cloud",
   "base_url": "http://localhost:11435/v1",
   "active_model": "nvidia/llama-3.1-nemotron-70b-instruct",
-  "total_invocations": 38,
-  "total_prompt_tokens": 14200,
-  "total_completion_tokens": 3850,
-  "total_tokens": 18050,
-  "avg_tokens_per_request": 475.0,
+  "total_invocations": 42,
+  "total_prompt_tokens": 12850,
+  "total_completion_tokens": 3410,
+  "total_tokens": 16260,
+  "avg_tokens_per_request": 387.1,
   "throughput_est_tokens_sec": 142.5,
   "latency_avg_ms": 320,
   "speedup_vs_cloud_api": "14.2x",
   "purpose_breakdown": {
-    "attacker_generation": 11200,
-    "judge_evaluation": 6850
+    "attacker_generation": 9800,
+    "judge_evaluation": 6460
   }
 }
-```
-
----
-
-## 🛠️ Technology Stack
-
-| Layer | Technology |
-| :--- | :--- |
-| **Backend Framework** | Python 3.11+, FastAPI, Uvicorn |
-| **LLM Engine** | OpenAI-compatible SDK (pointing to NVIDIA Brev GPU endpoints) |
-| **Testing & Security** | Pytest, PyYAML, Pydantic v2 |
-| **Frontend Dashboard** | Next.js 14 (App Router), TypeScript, Tailwind CSS |
-| **Target Sandbox Agent** | FastAPI sandbox with mock tools (`delete_record`, `search_knowledge_base`) |
-
----
-
-## 📂 Repository Structure
-
-```
-gauntlet/
-├── apps/
-│   ├── backend/                    # Python FastAPI service & security pipeline
-│   │   ├── Dockerfile              # Container spec for Backend API
-│   │   ├── gauntlet/
-│   │   │   ├── shared/             # Pydantic schemas & config
-│   │   │   ├── engine/             # Brev LLM attacker & judge engines
-│   │   │   ├── core/               # Policy parser, gate evaluator, regression generator
-│   │   │   ├── pipeline/           # Orchestrator & reproducible trace store
-│   │   │   └── api/                # FastAPI routes (/api/run, /api/regress, /api/brev/telemetry)
-│   │   ├── target_agent/           # Deliberately vulnerable sandbox target agent
-│   │   ├── policies/               # YAML security policy definitions
-│   │   └── tests/                  # Backend Pytest test suite (19 tests)
-│   │
-│   └── frontend/                   # Next.js 14 dashboard UI
-│       ├── app/                    # App Router pages (Dashboard, Run Report, Trace Detail)
-│       ├── components/             # TargetGuardSwitch, FailureClusters, BrevMetrics, GateBadge
-│       ├── lib/                    # API client, TypeScript interfaces, hooks
-│       └── mocks/                  # Offline mock data for instant testing
-│
-├── docs/                           # API contract & hackathon documentation
-└── docker-compose.yml              # Monorepo container deployment
-```
-
----
-
-## 🧪 Testing & Verification
-
-Run the backend unit test suite:
-
-```bash
-cd apps/backend
-python3 -m pytest tests/ -v
 ```
 
 ---
