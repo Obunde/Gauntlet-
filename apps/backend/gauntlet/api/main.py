@@ -132,4 +132,4 @@ def target_guard(body: GuardRequest) -> GuardResponse:
         data = resp.json()
         return GuardResponse(enabled=bool(data.get("enabled", body.enabled)))
     except Exception as exc:
-        raise HTTPException(502, f"Target agent guard toggle failed: {exc}") from exc
+        raise HTTPException(502, f"Target agent guard toggle failed ({target}): {exc}") from exc

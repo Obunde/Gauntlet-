@@ -25,9 +25,14 @@ def env(key: str, default: str = "") -> str:
     return os.getenv(key, default)
 
 
-def flag(key: str) -> bool:
-    """True when the variable is set to 1 (e.g. USE_RULE_JUDGE=1)."""
-    return os.getenv(key, "0").strip() == "1"
+def flag(key: str, default: bool = False) -> bool:
+    """Retrieve environment boolean flag."""
+    val = os.getenv(key, "").strip().lower()
+    if val in ("1", "true", "yes", "on"):
+        return True
+    if val in ("0", "false", "no", "off"):
+        return False
+    return default
 
 
 def api_mode() -> str:
@@ -44,4 +49,4 @@ def cors_origins() -> list[str]:
 
 
 def target_url() -> str:
-    return os.getenv("TARGET_URL", "http://localhost:8001")
+    return os.getenv("TARGET_URL", "http://localhost:8001").strip()

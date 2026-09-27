@@ -50,6 +50,9 @@ def next_run_id() -> str:
                 n += 1
 
 
+new_run_id = next_run_id
+
+
 def save_run(run: RunStatus) -> None:
     path = _run_file(run.run_id)
     with _lock(run.run_id):

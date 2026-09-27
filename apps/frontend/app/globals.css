@@ -43,15 +43,10 @@ html {
 }
 
 body {
-  min-height: 100vh;
-  margin: 0;
-  background: var(--background);
-  color: var(--text);
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Segoe UI", sans-serif;
-  font-size: 14px;
-  line-height: 1.5;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
+  @apply min-h-screen bg-[#090c14] text-slate-100 antialiased text-base;
+  background-image:
+    radial-gradient(circle at 75% -10%, rgba(37, 99, 235, 0.2), transparent 36rem),
+    radial-gradient(circle at 18% 58%, rgba(34, 211, 238, 0.08), transparent 32rem);
 }
 
 button,
@@ -234,13 +229,55 @@ summary:focus-visible {
   outline-offset: 3px;
 }
 
+@layer components {
+  .panel {
+    @apply rounded-2xl border border-white/15 bg-[#101521]/95 shadow-[0_18px_65px_rgba(0,0,0,.3)];
+  }
+
+  .eyebrow {
+    @apply text-xs font-bold uppercase tracking-[0.2em] text-cyan-400/90;
+  }
+
+  .field-label {
+    @apply block text-sm font-semibold text-slate-200;
+  }
+
+  .field-control {
+    @apply mt-2 block w-full rounded-xl border border-white/20 bg-[#0b0f18] px-4 py-3.5 text-base text-slate-100 placeholder:text-slate-500 transition hover:border-white/30 focus:border-cyan-300 focus:ring-1 focus:ring-cyan-300;
+  }
+
+  .primary-button {
+    @apply inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-cyan-300 px-6 py-3 text-base font-bold text-slate-950 shadow-[0_10px_30px_rgba(103,232,249,.25)] transition hover:bg-cyan-200 hover:scale-[1.02] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40;
+  }
+
+  .secondary-button {
+    @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-white/20 bg-white/[0.05] px-5 py-2.5 text-base font-semibold text-slate-100 transition hover:border-white/30 hover:bg-white/[0.1] disabled:cursor-not-allowed disabled:opacity-40;
+  }
+
+  .nav-link {
+    @apply flex items-center gap-3 rounded-xl px-3.5 py-3 text-base font-medium text-slate-400 transition hover:bg-white/[0.06] hover:text-slate-100;
+  }
+
+  .nav-link-active {
+    @apply border border-cyan-300/20 bg-cyan-300/10 text-cyan-200 font-semibold shadow-[0_0_20px_rgba(103,232,249,0.1)];
+  }
+
+  .status-pill {
+    @apply inline-flex items-center gap-2 rounded-full border border-emerald-400/30 bg-emerald-400/10 px-3 py-1 text-xs font-semibold text-emerald-300;
+  }
+
+  .status-pill i {
+    @apply h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_8px_#34d399];
+  }
+}
+
 .segmented {
   display: grid;
   grid-auto-flow: column;
   grid-auto-columns: 1fr;
   gap: 3px;
   border: 1px solid var(--border);
-  border-radius: 9px;
+  border-radius: 99px;
   background: #0c0c0e;
   padding: 3px;
 }
@@ -403,171 +440,3 @@ details > summary::-webkit-details-marker {
     transition-duration: 0.01ms !important;
   }
 }
-
-/* Light mode overrides */
-[data-theme="light"] ::selection {
-  background: #d4d4d8;
-  color: #09090b;
-}
-
-[data-theme="light"] .topbar {
-  border-bottom: 1px solid rgba(228, 228, 231, 0.85);
-  background: rgba(250, 250, 250, 0.85);
-}
-
-[data-theme="light"] .brand-mark {
-  background: #09090b;
-  color: #fafafa;
-  border-color: #18181b;
-}
-
-[data-theme="light"] .nav-link:hover {
-  background: #e4e4e7;
-  color: var(--text);
-}
-
-[data-theme="light"] .field-control {
-  background: #ffffff;
-  color: var(--text);
-  border-color: var(--border-strong);
-}
-
-[data-theme="light"] .field-control::placeholder {
-  color: #a1a1aa;
-}
-
-[data-theme="light"] .field-control:focus {
-  border-color: #71717a;
-  box-shadow: 0 0 0 3px rgba(39, 39, 42, 0.08);
-}
-
-[data-theme="light"] .primary-button {
-  border: 1px solid #09090b;
-  background: #09090b;
-  color: #fafafa;
-}
-
-[data-theme="light"] .primary-button:hover:not(:disabled) {
-  background: #27272a;
-  border-color: #27272a;
-}
-
-[data-theme="light"] .secondary-button {
-  border: 1px solid var(--border-strong);
-  background: #ffffff;
-  color: #18181b;
-}
-
-[data-theme="light"] .secondary-button:hover:not(:disabled) {
-  border-color: #a1a1aa;
-  background: #f4f4f5;
-}
-
-[data-theme="light"] .icon-button {
-  border-color: var(--border);
-  color: var(--muted);
-}
-
-[data-theme="light"] .icon-button:hover:not(:disabled) {
-  border-color: #a1a1aa;
-  color: var(--text);
-  background: #f4f4f5;
-}
-
-[data-theme="light"] a:focus-visible,
-[data-theme="light"] button:focus-visible,
-[data-theme="light"] input:focus-visible,
-[data-theme="light"] select:focus-visible,
-[data-theme="light"] summary:focus-visible {
-  outline-color: #09090b;
-}
-
-[data-theme="light"] .segmented {
-  background: #f4f4f5;
-}
-
-[data-theme="light"] .segment[aria-pressed="true"] {
-  background: #ffffff;
-  color: #09090b;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06), inset 0 0 0 1px #e4e4e7;
-}
-
-[data-theme="light"] .data-table td {
-  border-bottom: 1px solid rgba(228, 228, 231, 0.8);
-  color: #27272a;
-}
-
-[data-theme="light"] .data-table tbody tr:hover {
-  background: rgba(244, 244, 245, 0.7);
-}
-
-/* Light mode utility mappings */
-[data-theme="light"] .text-zinc-50,
-[data-theme="light"] .text-zinc-100 {
-  color: #09090b !important;
-}
-
-[data-theme="light"] .text-zinc-200 {
-  color: #18181b !important;
-}
-
-[data-theme="light"] .text-zinc-300 {
-  color: #27272a !important;
-}
-
-[data-theme="light"] .text-zinc-400 {
-  color: #52525b !important;
-}
-
-[data-theme="light"] .text-zinc-500 {
-  color: #71717a !important;
-}
-
-[data-theme="light"] .text-zinc-600 {
-  color: #71717a !important;
-}
-
-[data-theme="light"] .hover\:text-zinc-200:hover,
-[data-theme="light"] .hover\:text-zinc-300:hover {
-  color: #09090b !important;
-}
-
-[data-theme="light"] .border-zinc-800 {
-  border-color: #e4e4e7 !important;
-}
-
-[data-theme="light"] .border-zinc-700 {
-  border-color: #d4d4d8 !important;
-}
-
-[data-theme="light"] .border-zinc-500 {
-  border-color: #a1a1aa !important;
-}
-
-[data-theme="light"] .border-l-zinc-500 {
-  border-left-color: #a1a1aa !important;
-}
-
-[data-theme="light"] .hover\:border-zinc-700:hover {
-  border-color: #a1a1aa !important;
-}
-
-[data-theme="light"] .bg-zinc-950\/60,
-[data-theme="light"] .bg-zinc-950\/40,
-[data-theme="light"] .bg-zinc-950 {
-  background-color: #f4f4f5 !important;
-}
-
-[data-theme="light"] .bg-zinc-900 {
-  background-color: #f4f4f5 !important;
-}
-
-[data-theme="light"] .bg-zinc-800,
-[data-theme="light"] .bg-zinc-800\/70 {
-  background-color: #e4e4e7 !important;
-}
-
-[data-theme="light"] .accent-zinc-100 {
-  accent-color: #09090b !important;
-}
-

@@ -19,7 +19,7 @@ dependencies = [
 ]
 
 [tool.setuptools.packages.find]
-include = ["gauntlet*"]
+include = ["gauntlet*", "target_agent*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
