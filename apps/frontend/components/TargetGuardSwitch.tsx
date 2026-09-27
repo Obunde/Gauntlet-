@@ -12,8 +12,8 @@ export default function TargetGuardSwitch() {
     setLoading(true);
     try {
       const res = await setTargetGuard(newHardened);
-      setHardened(res.hardened);
-      setMessage(res.message);
+      setHardened(res.enabled);
+      setMessage(res.enabled ? "Target guard ACTIVE (HARDENED)." : "Target guard DISABLED (VULNERABLE).");
       setTimeout(() => setMessage(null), 3500);
     } catch (err) {
       setMessage(`Failed to set guard state: ${err}`);
