@@ -19,7 +19,7 @@
 | Resource | URL / Credentials | Status |
 | :--- | :--- | :--- |
 | **Production Web App** | [https://guantlet.netlify.app](https://guantlet.netlify.app) | 🟢 Live (Netlify Deployment) |
-| **Gauntlet Control API** | [http://216.86.161.251:8000/docs](http://216.86.161.251:8000/docs) / [Brev GPU Endpoint](https://openclaw-33zc8iscj.gobrev.dev) | 🟢 Live (NVIDIA Brev GPU Engine) |
+| **Gauntlet Control API** | [http://216.86.161.251:8000/docs](http://216.86.161.251:8000/docs) | 🟢 Live (NVIDIA Brev GPU Engine) |
 | **Demo Login Email** | `admin@gauntlet.internal` | 🔑 Keycloak SSO Pre-Filled |
 | **Demo Login Password** | `Gauntlet2026!` | 🔑 Keycloak SSO Pre-Filled |
 | **SSO Realm & Role** | Realm: `gauntlet-security-realm` · Role: `Security Engineer (Admin)` | 🔐 OpenID Connect & SAML 2.0 Active |
@@ -102,7 +102,7 @@ flowchart TD
 
     subgraph "Brev Candidate Agent Instance (openclaw-6d9d7d)"
         Target_Agent["Candidate Target Agent Sandbox"]
-        Public_HTTPS["https://openclaw-33zc8iscj.gobrev.dev"]
+        Public_HTTPS["http://216.86.161.251:8000"]
     end
 
     subgraph "Client / Dashboard"
@@ -129,7 +129,7 @@ sequenceDiagram
     participant Target as Target Agent (openclaw-6d9d7d)
     participant Store as Trace Store
 
-    UI->>API: POST /api/run {policy_id: "financial_agent", target_url: "https://openclaw-33zc8iscj.gobrev.dev"}
+    UI->>API: POST /api/run {policy_id: "financial_agent", target_url: "http://localhost:8001"}
     API-->>UI: 200 OK {run_id: "run_20260927_001"}
     
     par Parallel Red-Teaming Loop (ThreadPoolExecutor)
