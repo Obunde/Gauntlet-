@@ -12,6 +12,20 @@
 
 ---
 
+## 🌐 Live Deployment & Demo Credentials
+
+> 🔐 **Single-Click Demo Access**: Click the **"Fill Demo"** button on the login screen to automatically populate demo credentials!
+
+| Resource | URL / Credentials | Status |
+| :--- | :--- | :--- |
+| **Production Web App** | [https://guantlet.netlify.app](https://guantlet.netlify.app) | 🟢 Live (Netlify Deployment) |
+| **Gauntlet Control API** | [http://localhost:8000](http://localhost:8000) / [Brev GPU Endpoint](https://openclaw-33zc8iscj.gobrev.dev) | 🟢 Live (NVIDIA Brev GPU Engine) |
+| **Demo Login Email** | `admin@gauntlet.internal` | 🔑 Keycloak SSO Pre-Filled |
+| **Demo Login Password** | `Gauntlet2026!` | 🔑 Keycloak SSO Pre-Filled |
+| **SSO Realm & Role** | Realm: `gauntlet-security-realm` · Role: `Security Engineer (Admin)` | 🔐 OpenID Connect & SAML 2.0 Active |
+
+---
+
 ## 🎯 What is Gauntlet?
 
 **Gauntlet** is an enterprise-grade automated security release gate designed for development teams shipping AI-powered applications and agents. Powered by **NVIDIA Brev** cloud GPUs, Gauntlet subjects candidate AI agents to multi-agent OWASP Top 10 attack vectors, evaluates policy compliance, and automatically synthesizes deterministic Python regression test suites.
