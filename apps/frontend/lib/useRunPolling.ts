@@ -7,6 +7,7 @@ import type { RunStatus } from "./types";
 export function useRunPolling(runId: string, replay = false) {
   const [run, setRun] = useState<RunStatus | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [attempt, setAttempt] = useState(0);
 
   useEffect(() => {
     if (!runId) return;
@@ -37,7 +38,13 @@ export function useRunPolling(runId: string, replay = false) {
       active = false;
       if (timer) clearTimeout(timer);
     };
-  }, [runId, replay]);
+  }, [runId, replay, attempt]);
 
-  return { run, error };
+  const retry = () => {
+    setError(null);
+    setRun(null);
+    setAttempt((current) => current + 1);
+  };
+
+  return { run, error, retry };
 }

@@ -1,54 +1,22 @@
 export default function GateBadge({ gate }: { gate: "RED" | "GREEN" | null }) {
   if (!gate) {
     return (
-      <div className="panel relative overflow-hidden px-7 py-9">
-        <div className="absolute inset-y-0 left-0 w-1.5 bg-amber-400 animate-pulse" />
-        <div className="flex items-center gap-2">
-          <span className="h-2 w-2 rounded-full bg-amber-400 animate-ping" />
-          <p className="eyebrow text-amber-300 font-mono">GATE EVALUATING</p>
-        </div>
-        <div className="mt-2 text-3xl font-black tracking-tight text-white">Testing release candidate…</div>
-        <p className="mt-2 text-sm text-slate-400">Gauntlet is generating, executing, and judging adversarial attacks in Brev GPU sandbox.</p>
+      <div className="surface flex items-center justify-between gap-4 border-l-2 border-l-zinc-500 px-5 py-4">
+        <div><p className="section-label">Gate decision</p><p className="mt-1 text-sm font-medium text-zinc-300">Evaluating release candidate…</p></div>
+        <span className="rounded-md border border-zinc-700 px-2.5 py-1 text-xs font-semibold text-zinc-500">PENDING</span>
       </div>
     );
   }
+
   const red = gate === "RED";
   return (
-    <div
-      className={`relative overflow-hidden rounded-2xl border px-6 py-7 sm:px-8 transition-all duration-300 ${
-        red
-          ? "border-rose-500/30 bg-rose-500/[0.09] shadow-[0_0_40px_rgba(244,63,94,0.15)]"
-          : "border-emerald-500/30 bg-emerald-500/[0.09] shadow-[0_0_40px_rgba(16,185,129,0.15)]"
-      }`}
-    >
-      <div className={`absolute inset-y-0 left-0 w-2 ${red ? "bg-rose-500" : "bg-emerald-400"}`} />
-      <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <div className="flex items-center gap-2">
-            <span className={`h-2.5 w-2.5 rounded-full ${red ? "bg-rose-400 shadow-[0_0_10px_#f43f5e]" : "bg-emerald-400 shadow-[0_0_10px_#34d399]"}`} />
-            <div className={`text-xs font-mono font-bold uppercase tracking-[0.22em] ${red ? "text-rose-400" : "text-emerald-400"}`}>
-              RELEASE GATE DECISION · {gate}
-            </div>
-          </div>
-          <div className="mt-2 text-3xl font-black tracking-[-0.04em] text-white sm:text-4xl">
-            {red ? "RELEASE BLOCKED (Vulnerable Agent)" : "CLEAR TO SHIP (Protected Agent)"}
-          </div>
-          <p className="mt-2 text-sm text-slate-300 max-w-xl">
-            {red
-              ? "Critical policy breach detected. Adversarial test called forbidden delete_record tool."
-              : "All security regression tests passed. No policy violations detected."}
-          </p>
-        </div>
-        <div
-          className={`grid h-24 w-24 shrink-0 place-items-center rounded-2xl border text-3xl font-black shadow-lg transition-transform duration-300 hover:scale-105 ${
-            red
-              ? "border-rose-400/30 bg-rose-500/20 text-rose-300 shadow-rose-900/30"
-              : "border-emerald-400/30 bg-emerald-500/20 text-emerald-300 shadow-emerald-900/30"
-          }`}
-        >
-          {red ? "RED" : "GREEN"}
-        </div>
+    <div className={`surface flex items-center justify-between gap-4 border-l-2 px-5 py-4 ${red ? "border-l-red-400 bg-red-500/[0.035]" : "border-l-green-400 bg-green-500/[0.035]"}`}>
+      <div>
+        <p className={`section-label ${red ? "result-red" : "result-green"}`}>Gate decision</p>
+        <p className="mt-1 text-base font-semibold text-zinc-100">{red ? "Release blocked" : "Clear to ship"}</p>
+        <p className="mt-1 text-xs text-zinc-500">{red ? "A confirmed policy breach requires remediation." : "All generated security regression tests passed."}</p>
       </div>
+      <span className={`rounded-md border px-3 py-1.5 text-xs font-bold ${red ? "border-red-400/30 bg-red-500/10 result-red" : "border-green-400/30 bg-green-500/10 result-green"}`}>{gate}</span>
     </div>
   );
 }
