@@ -93,12 +93,11 @@ html[data-theme="light"] .text-slate-400 {
   color: #334155 !important;
 }
 
-html[data-theme="light"] .bg-[#050810],
-html[data-theme="light"] .bg-[#080b12]/95,
-html[data-theme="light"] .bg-[#080b12]/80,
-html[data-theme="light"] .bg-[#0b0f18],
-html[data-theme="light"] .bg-[#0c101a]/90,
-html[data-theme="light"] .bg-[#101521]/95 {
+html[data-theme="light"] .panel,
+html[data-theme="light"] .surface,
+html[data-theme="light"] .surface-raised,
+html[data-theme="light"] aside,
+html[data-theme="light"] header {
   background-color: #ffffff !important;
   color: #0f172a !important;
 }
