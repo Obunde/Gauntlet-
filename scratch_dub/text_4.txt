@@ -1,0 +1,1 @@
+Here is the magic: Gauntlet does not just block breaches, it heals them. With one click on Execute Remediation Loop, we apply function guardrails and run auto generated Pytest regression assertions. All tests pass, and the release gate flips from RED to GREEN! A permanent security regression test is created.

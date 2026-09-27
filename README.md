@@ -19,7 +19,7 @@
 | Resource | URL / Credentials | Status |
 | :--- | :--- | :--- |
 | **Production Web App** | [https://guantlet.netlify.app](https://guantlet.netlify.app) | 🟢 Live (Netlify Deployment) |
-| **Gauntlet Control API** | [http://localhost:8000](http://localhost:8000) / [Brev GPU Endpoint](https://openclaw-33zc8iscj.gobrev.dev) | 🟢 Live (NVIDIA Brev GPU Engine) |
+| **Gauntlet Control API** | [http://216.86.161.251:8000/docs](http://216.86.161.251:8000/docs) / [Brev GPU Endpoint](https://openclaw-33zc8iscj.gobrev.dev) | 🟢 Live (NVIDIA Brev GPU Engine) |
 | **Demo Login Email** | `admin@gauntlet.internal` | 🔑 Keycloak SSO Pre-Filled |
 | **Demo Login Password** | `Gauntlet2026!` | 🔑 Keycloak SSO Pre-Filled |
 | **SSO Realm & Role** | Realm: `gauntlet-security-realm` · Role: `Security Engineer (Admin)` | 🔐 OpenID Connect & SAML 2.0 Active |
@@ -227,7 +227,7 @@ brev port-forward mechanical-chocolate-wolf -p 8000:8000
 docker compose up --build
 ```
 - **Frontend**: [http://localhost:3000](http://localhost:3000)
-- **Gauntlet Control API**: [http://localhost:8000/docs](http://localhost:8000/docs)
+- **Gauntlet Control API**: [http://216.86.161.251:8000/docs](http://216.86.161.251:8000/docs)
 - **Target Application**: [http://localhost:8001/docs](http://localhost:8001/docs)
 
 ---

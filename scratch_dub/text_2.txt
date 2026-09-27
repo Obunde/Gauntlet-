@@ -1,0 +1,1 @@
+Watch what happens when we put our agent through the Gauntlet. Powered by an NVIDIA L40S 48 gigabyte GPU on Brev Cloud running Qwen 2.5 Coder, our parallel engine synthesizes OWASP adversarial prompt injections and tool invocation probes with an incredible 14 times speedup over cloud APIs!

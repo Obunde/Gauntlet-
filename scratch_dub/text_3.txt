@@ -1,0 +1,1 @@
+Boom! Gate RED! Gauntlet caught the failure instantly. Our OWASP judge detected a critical breach: a prompt injection tricked the agent into calling delete record 42 without authorization. Gauntlet captures the exact prompt, payload, and tool execution trace.

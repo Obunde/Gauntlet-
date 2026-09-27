@@ -1,0 +1,1 @@
+Enter Gauntlet, the enterprise security release gate built for AI agents. We authenticate through Keycloak SSO into our security control plane to ensure no unverified agent ever reaches production.
