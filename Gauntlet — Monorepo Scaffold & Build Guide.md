@@ -190,6 +190,88 @@ The schemas, mock JSON and a live Brev endpoint must exist by H1, because every 
 
 If a gate slips, PD raises it at the next stand-up (H3, H6, H9) and the team switches to the matching fallback below rather than extending the phase.
 
+## Sprint plan
+
+This plan is built around the official schedule. One structural change: with the fifth person on documentation, **nobody is the dedicated integrator (PD) anymore**, so PD's backend work is split between the two backend developers.
+
+### Roles
+
+| Member | Owns |
+|---|---|
+| **BE1 — AI & pipeline** | LLM client (Brev if allocated, otherwise NVIDIA Build, Groq, or Gemini), attack engine, judge, target agent, orchestrator |
+| **BE2 — Core & API** | Shared schemas, FastAPI routes, policy parser, trace store, gate, rule judge, regression generator |
+| **FE1 — Dashboard** | Next.js shell, API client and mocks, Run button, gate badge, attack list, polling, replay mode |
+| **FE2 — Detail views** | Attack detail page, trace viewer, regression code view, re-run regression button, "Top Issues" view (stretch) |
+| **DOC — Docs & submission** | README, project card, presentation slides, video script and edit, AI/tool disclosure, award fit explanations, submission form |
+
+Times below are the official Tunis-time schedule, with Nairobi times in brackets. Nairobi is two hours ahead. If your hackerspace runs on local time, shift everything, but the **17:30 Tunis (19:30 Nairobi) submission deadline is fixed**.
+
+### Sprint 0 — Setup (09:45–11:15 [11:45–13:15])
+
+Runs alongside the briefings and workshop, so some of the team will need to take turns attending.
+
+| Member | Deliverables |
+|---|---|
+| BE1 | Confirm LLM access: Brev voucher by 10:15 if allocated, otherwise an NVIDIA Build or Groq key. One successful test completion. |
+| BE2 | Run the scaffold prompt to generate the repo. Push `schemas.py` and API stubs returning mock data. Set up CORS. |
+| FE1 | Next.js app runs. `mocks/run_mock.json` is in place. `lib/api.ts` works in mock mode. |
+| FE2 | Empty pages for the run view and attack detail view, with routing working. |
+| DOC | Lead verifies attendance by 10:00 Tunis. Create the slides file and README skeleton. Note the submission requirements from the 09:00 briefing. |
+
+**Done when:** the repo is shared, the schemas are frozen, the frontend renders mock data, and the LLM responds.
+
+### Sprint 1 — First working attack (11:15–13:00 [13:15–15:00])
+
+Includes the 11:30 mentor checkpoint.
+
+| Member | Deliverables |
+|---|---|
+| BE1 | Target agent on port 8001, with deterministic vulnerable mode and the `HARDENED` guard. Attack engine generating prompts from the policy. Fallback `attacks.json`. |
+| BE2 | Policy parser, trace store with deterministic `trace_id`, gate logic, rule judge, and unit tests for each. |
+| FE1 | Run button, gate badge, and attack list, all built on mocks. |
+| FE2 | Trace viewer: prompt, response, tool calls, judge reasoning, timestamp, trace ID. |
+| DOC | Drafts of the project summary (at most 150 words), problem statement, and solution/features. Slide outline. Notes from the mentor checkpoint. |
+
+**Done when:** one attack sent to the target agent produces a `delete_record` call that gets stored as a trace.
+
+### Sprint 2 — End-to-end pipeline (14:00–15:30 [16:00–17:30])
+
+| Member | Deliverables |
+|---|---|
+| BE1 | LLM judge (temperature 0, falls back to the rule judge). Orchestrator running generate, send, judge, and store for about 10 attacks. |
+| BE2 | Regression test generator, real API endpoints (`/run`, `/run/{id}`, `/regress`, `/policies`), and background task execution. |
+| FE1 | Switch from mocks to the live API. Polling works, and the gate turns RED on a real run. |
+| FE2 | Regression code view with copy and download. "Re-run regression tests" button. |
+| DOC | Draft the AI/tool disclosure, the Responsible AI section, and the award fit explanations. Write the 90-second video script. Build the first version of the slides. |
+
+**Done when:** a single click produces a real run in which the gate turns RED and a regression test file is generated. Confirm this at the 15:30 technical checkpoint.
+
+### Sprint 3 — Prove, harden, and record (15:45–17:00 [17:45–19:00])
+
+| Member | Deliverables |
+|---|---|
+| BE1 | Three clean runs in a row. Timings for the "testing and reliability" criterion. Pass the models and prompts used to DOC. |
+| BE2 | Harden the agent, re-run the regressions, and confirm the gate turns GREEN. Save `data/recorded_run/` as a backup. *Stretch:* group failures by violated rule and rank them (for SupplyzPro). |
+| FE1 | Replay mode and final polish. **Record the demo screen capture by 16:30 [18:30].** |
+| FE2 | Finish the detail views. *Stretch:* "Top Issues" panel. Help FE1 record the video. |
+| DOC | Edit the 90-second video. Finalise the slides, README, and disclosure. Make the repo public and upload the video and slides. |
+
+**Feature freeze at 16:15 [18:15].** After that, only bug fixes.
+
+### Sprint 4 — Submit (17:00–17:30 [19:00–19:30])
+
+| Member | Deliverables |
+|---|---|
+| DOC | Fill in and submit the form using the same team name and lead email as the team confirmation. |
+| All | Open every link (source code, presentation, video) in a private browser window. Fix anything broken. Keep the submission confirmation. |
+
+**Target submission time: 17:15 [19:15]**, leaving 15 minutes of margin.
+
+### Two things to keep in mind
+
+* **DOC is your early warning system.** Their drafts depend on real details (model names, timings, features), so the other four should send those over the moment they exist, not at the end.
+* **Assign a stand-in integrator.** With no PD, someone has to own "does the whole thing run end to end." BE2 is the natural choice, since the API sits at the centre. Hold a 5-minute sync at the start of each sprint.
+
 ## Fallbacks
 
 Every row of the BRD's failure playbook maps to a switch already built into the scaffold, so no fallback needs new code on demo day.
