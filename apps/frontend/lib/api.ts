@@ -59,3 +59,26 @@ export async function setTargetGuard(hardened: boolean): Promise<{ hardened: boo
   });
 }
 
+export async function getBrevTelemetry() {
+  if (USE_MOCKS) {
+    return {
+      instance_name: "mechanical-chocolate-wolf",
+      gpu_spec: "NVIDIA L40S 48GB Tensor Core GPU",
+      provider: "NVIDIA Brev Cloud",
+      base_url: "http://localhost:11435/v1",
+      active_model: "nvidia/llama-3.1-nemotron-70b-instruct",
+      total_invocations: 42,
+      total_prompt_tokens: 12850,
+      total_completion_tokens: 3410,
+      total_tokens: 16260,
+      avg_tokens_per_request: 387.1,
+      throughput_est_tokens_sec: 142.5,
+      latency_avg_ms: 320,
+      speedup_vs_cloud_api: "14.2x",
+      purpose_breakdown: { attacker_generation: 9800, judge_evaluation: 6460 }
+    };
+  }
+  return request("/api/brev/telemetry");
+}
+
+

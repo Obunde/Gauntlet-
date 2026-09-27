@@ -61,3 +61,21 @@ export interface GuardResponse {
   hardened: boolean;
   message: string;
 }
+
+export interface BrevTelemetryResponse {
+  instance_name: string;
+  gpu_spec: string;
+  provider: string;
+  base_url: string;
+  active_model: string;
+  total_invocations: number;
+  total_prompt_tokens: number;
+  total_completion_tokens: number;
+  total_tokens: number;
+  avg_tokens_per_request: number;
+  throughput_est_tokens_sec: number;
+  latency_avg_ms: number;
+  speedup_vs_cloud_api: string;
+  purpose_breakdown: Record<string, number>;
+}
+
