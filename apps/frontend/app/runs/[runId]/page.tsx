@@ -78,7 +78,13 @@ export default function RunPage() {
         <AttackList attacks={run.attacks} replay={replay} />
       </section>
 
-      <RemediationPanel runId={runId} disabled={run.status !== "done" || run.regression_tests.length === 0} onComplete={setRegressResult} />
+      <RemediationPanel
+        runId={runId}
+        attacks={run.attacks}
+        regressionTests={run.regression_tests}
+        disabled={run.status !== "done" || run.regression_tests.length === 0}
+        onComplete={setRegressResult}
+      />
     </div>
   );
 }
