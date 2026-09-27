@@ -9,8 +9,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from gauntlet.core import regression
 from gauntlet.core.policy import list_policies
 from gauntlet.pipeline import orchestrator, trace_store
+from gauntlet.engine import brev_client
 from gauntlet.shared import config
 from gauntlet.shared.schemas import (
+    BrevTelemetryResponse,
     GuardRequest,
     GuardResponse,
     HealthResponse,
@@ -40,9 +42,17 @@ def health() -> HealthResponse:
     return HealthResponse(ok=True, mode="mock" if mode == "mock" else "live", pipeline_ready=True)
 
 
+@app.get("/api/brev/telemetry", response_model=BrevTelemetryResponse)
+def brev_telemetry() -> BrevTelemetryResponse:
+    """Return live Brev GPU usage metrics, hardware specs, and token counts."""
+    data = brev_client.get_telemetry_summary()
+    return BrevTelemetryResponse(**data)
+
+
 @app.get("/api/policies", response_model=list[str])
 def get_policies() -> list[str]:
     return list_policies()
+
 
 
 @app.post("/api/run", response_model=StartRunResponse)

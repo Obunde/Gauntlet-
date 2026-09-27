@@ -94,3 +94,21 @@ class HealthResponse(BaseModel):
     mode: Literal["mock", "live"] = "live"
     pipeline_ready: bool = True
 
+
+class BrevTelemetryResponse(BaseModel):
+    instance_name: str = "mechanical-chocolate-wolf"
+    gpu_spec: str = "NVIDIA L40S 48GB Tensor Core GPU"
+    provider: str = "NVIDIA Brev Cloud"
+    base_url: str
+    active_model: str
+    total_invocations: int
+    total_prompt_tokens: int
+    total_completion_tokens: int
+    total_tokens: int
+    avg_tokens_per_request: float
+    throughput_est_tokens_sec: float
+    latency_avg_ms: int
+    speedup_vs_cloud_api: str
+    purpose_breakdown: dict[str, int]
+
+
