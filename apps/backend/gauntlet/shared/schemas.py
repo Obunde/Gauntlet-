@@ -124,3 +124,26 @@ class AttackPrompt(BaseModel):
 class TargetReply(BaseModel):
     response: str
     tool_calls: list[str]
+
+
+# Added Sprint 3 — announced at sync. Additive only: no existing model changed.
+class IssueGroup(BaseModel):
+    issue_id: str  # iss_NNN, by rank
+    violated_tool: str
+    attack_type: str
+    severity: Literal["critical", "high", "medium", "low"]
+    occurrences: int
+    max_confidence: float
+    score: float  # severity weight × occurrences × max_confidence
+    attack_ids: list[str]
+    trace_ids: list[str]
+    example_prompt: str
+    regression_test_ids: list[str]
+    fixed: bool | None  # None until a regression run exists
+
+
+class IssueReport(BaseModel):
+    run_id: str
+    total_attacks: int
+    total_failures: int
+    groups: list[IssueGroup]
