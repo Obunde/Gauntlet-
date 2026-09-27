@@ -47,3 +47,15 @@ export async function regress(runId: string): Promise<RegressResponse> {
   }
   return request<RegressResponse>(`/api/run/${runId}/regress`, { method: "POST" });
 }
+
+export async function setTargetGuard(hardened: boolean): Promise<{ hardened: boolean; message: string }> {
+  if (USE_MOCKS) {
+    await delay(300);
+    return { hardened, message: hardened ? "Target agent is now HARDENED (Guard ACTIVE)" : "Target agent is VULNERABLE (Guard OFF)" };
+  }
+  return request<{ hardened: boolean; message: string }>("/api/target/guard", {
+    method: "POST",
+    body: JSON.stringify({ hardened }),
+  });
+}
+
