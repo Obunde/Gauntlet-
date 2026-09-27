@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
-export default function HomeLandingPage() {
+export default function LandingPage() {
   const router = useRouter();
   const [showKeycloakModal, setShowKeycloakModal] = useState(false);
   const [authenticated, setAuthenticated] = useState(false);
@@ -22,8 +22,8 @@ export default function HomeLandingPage() {
     setAuthenticated(true);
     setShowKeycloakModal(false);
     setLoginError(null);
-    // Redirect to Console Dashboard upon login
-    router.push("/dashboard");
+    // Automatically navigate to Console Dashboard upon successful login
+    router.push("/");
   };
 
   return (
@@ -56,12 +56,9 @@ export default function HomeLandingPage() {
             </button>
           )}
 
-          <button
-            onClick={() => setShowKeycloakModal(true)}
-            className="primary-button text-xs font-bold shadow-lg shadow-cyan-950/50"
-          >
+          <Link href="/" className="primary-button text-xs font-bold shadow-lg shadow-cyan-950/50">
             Launch Console →
-          </button>
+          </Link>
         </div>
       </nav>
 
@@ -83,17 +80,14 @@ export default function HomeLandingPage() {
         </p>
 
         <div className="flex flex-wrap items-center justify-center gap-4 pt-4">
-          <button
-            onClick={() => setShowKeycloakModal(true)}
-            className="primary-button text-base px-8 py-3.5 font-extrabold shadow-xl"
-          >
-            🔐 Log In to Console →
-          </button>
+          <Link href="/" className="primary-button text-base px-8 py-3.5 font-extrabold shadow-xl">
+            Enter Security Console →
+          </Link>
           <button
             onClick={() => setShowKeycloakModal(true)}
             className="secondary-button text-base px-7 py-3.5 font-bold border-white/20 hover:border-cyan-400/40"
           >
-            Keycloak Enterprise SSO
+            🔐 Keycloak Enterprise Login
           </button>
         </div>
       </section>
@@ -172,7 +166,7 @@ export default function HomeLandingPage() {
                 type="submit"
                 className="w-full primary-button py-3 text-sm font-bold shadow-lg shadow-cyan-950/50"
               >
-                Sign in & Enter Console →
+                Sign in with Keycloak SSO
               </button>
             </form>
 

@@ -28,3 +28,7 @@ def rule_judge(policy: Policy, tool_calls: list[str]) -> JudgeVerdict:
         reasoning="No forbidden tool was called.",
         violated_rule=None,
     )
+
+
+# Alias for backward compatibility with judge module
+judge = rule_judge

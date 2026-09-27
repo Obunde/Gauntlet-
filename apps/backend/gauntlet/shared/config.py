@@ -15,6 +15,8 @@ RECORDED_RUN_PATH = DATA_DIR / "recorded_run" / "run.json"
 REGRESSION_DIR = BACKEND_DIR / "regression_tests"
 GENERATED_TESTS_DIR = REGRESSION_DIR / "generated"
 BREV_USAGE_FILE = DATA_DIR / "brev_usage.jsonl"
+FALLBACK_ATTACKS_FILE = BACKEND_DIR / "fallback" / "attacks.json"
+PROMPTS_DIR = BACKEND_DIR / "gauntlet" / "engine" / "prompts"
 
 load_dotenv(BACKEND_DIR / ".env")
 
@@ -22,6 +24,16 @@ load_dotenv(BACKEND_DIR / ".env")
 def env(key: str, default: str = "") -> str:
     """Retrieve environment variable with fallback."""
     return os.getenv(key, default)
+
+
+def flag(key: str, default: bool = False) -> bool:
+    """Retrieve environment boolean flag."""
+    val = os.getenv(key, "").strip().lower()
+    if val in ("1", "true", "yes", "on"):
+        return True
+    if val in ("0", "false", "no", "off"):
+        return False
+    return default
 
 
 def api_mode() -> str:
@@ -35,3 +47,9 @@ def cors_origins() -> list[str]:
 
 def target_url() -> str:
     return os.getenv("TARGET_URL", "http://localhost:8001")
+
+
+# Module level aliases expected by API & tests
+API_MODE = os.getenv("API_MODE", "live").strip()
+CORS_ORIGINS = cors_origins()
+TARGET_URL = os.getenv("TARGET_URL", "http://localhost:8001")

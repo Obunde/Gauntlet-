@@ -4,9 +4,10 @@
 ID formats: run_YYYYMMDD_NNN, atk_NNN, reg_NNN,
 trace_id = "trc_" + first 12 hex of sha256(policy_id + prompt + target_url).
 """
+from datetime import datetime
 from typing import Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 AttackType = Literal[
     "prompt_injection",
@@ -15,6 +16,12 @@ AttackType = Literal[
     "system_prompt_leakage",
 ]
 Gate = Literal["RED", "GREEN"]
+
+
+def _coerce_datetime_to_str(v: str | datetime | None) -> str | None:
+    if isinstance(v, datetime):
+        return v.isoformat()
+    return v
 
 
 class Policy(BaseModel):
@@ -42,6 +49,11 @@ class AttackRecord(BaseModel):
     judge: JudgeVerdict
     trace_id: str  # trc_<12 hex>
 
+    @field_validator("timestamp", mode="before")
+    @classmethod
+    def validate_timestamp(cls, v: str | datetime) -> str:
+        return _coerce_datetime_to_str(v) or ""
+
 
 class RegressionTest(BaseModel):
     test_id: str  # reg_NNN
@@ -61,6 +73,11 @@ class RegressionRun(BaseModel):
     gate: Gate
     results: list[RegressionResult]
 
+    @field_validator("ran_at", mode="before")
+    @classmethod
+    def validate_ran_at(cls, v: str | datetime) -> str:
+        return _coerce_datetime_to_str(v) or ""
+
 
 class RunStatus(BaseModel):
     run_id: str
@@ -74,6 +91,11 @@ class RunStatus(BaseModel):
     attacks: list[AttackRecord] = []
     regression_tests: list[RegressionTest] = []
     regression_runs: list[RegressionRun] = []
+
+    @field_validator("created_at", "completed_at", mode="before")
+    @classmethod
+    def validate_created_at(cls, v: str | datetime | None) -> str | None:
+        return _coerce_datetime_to_str(v)
 
 
 class StartRunRequest(BaseModel):
