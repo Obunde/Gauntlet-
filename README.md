@@ -70,7 +70,9 @@ Before an AI agent (e.g., a customer support agent with database tools) goes liv
 
 ---
 
-## 📐 System Architecture & Data Flow
+## 📐 Architecture & System Design
+
+### 1. High-Level System Architecture Overview
 
 ```mermaid
 graph TD
@@ -112,6 +114,74 @@ graph TD
     BrevClient --> BrevLogger
     Orchestrator --> TraceStore
     Orchestrator --> RegressEngine
+```
+
+---
+
+### 2. Distributed Multi-Instance Deployment on NVIDIA Brev
+
+```mermaid
+flowchart TD
+    subgraph "Brev GPU Control Instance (mechanical-chocolate-wolf)"
+        GPU["NVIDIA L40S 48GB Tensor Core GPU"]
+        API_Control["Gauntlet Control API (Port 8000)"]
+        BrevEngine["Multi-Threaded Attacker & Hybrid Judge LLMs"]
+    end
+
+    subgraph "Brev Candidate Agent Instance (openclaw-6d9d7d)"
+        Target_Agent["Candidate Target Agent Sandbox"]
+        Public_HTTPS["http://216.86.161.251:8000"]
+    end
+
+    subgraph "Client / Dashboard"
+        Frontend["Next.js Dashboard (Port 3000 / Netlify)"]
+    end
+
+    Frontend -->|1. POST /api/run| API_Control
+    API_Control -->|2. Generate Probes| BrevEngine
+    API_Control -->|3. HTTPS Security Scan| Public_HTTPS
+    Public_HTTPS --> Target_Agent
+    API_Control -->|4. Return RED/GREEN Gate| Frontend
+```
+
+---
+
+### 3. Multi-Agent Red-Teaming Execution Flow
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant UI as Next.js Dashboard
+    participant API as Gauntlet API (Port 8000)
+    participant Engine as Brev Red-Team Engine
+    participant Target as Target Agent (Port 8001)
+    participant Store as Trace Store
+
+    UI->>API: POST /api/run {policy_id: "customer_support", target_url: "http://localhost:8001"}
+    API-->>UI: 200 OK {run_id: "run_20260927_001"}
+    
+    par Parallel Red-Teaming Loop (ThreadPoolExecutor)
+        API->>Engine: Generate OWASP Attack Vectors (Attacker LLM)
+        Engine-->>API: Yield Probes (Prompt Injection, Tool Bypass, PII Leak)
+        
+        loop For Each Attack Vector (Parallel Threads)
+            API->>Target: POST /chat {prompt}
+            Target-->>API: Return Response & Tool Executions
+            API->>Engine: Audit Response (Hybrid Rule + Judge LLM)
+            Engine-->>API: Verdict (succeeded, confidence, reasoning)
+            API->>Store: Save Attack Record & Trace
+        end
+    end
+
+    alt Security Violations Detected
+        API->>Store: Mark Gate = RED
+        API->>API: Generate Pytest Regression Tests (test_reg_NNN.py)
+    else All Policy Checks Passed
+        API->>Store: Mark Gate = GREEN
+    end
+
+    UI->>API: GET /api/run/run_20260927_001
+    API-->>UI: Return Full Attack Graph & Security Gate Verdict
 ```
 
 ---
@@ -194,6 +264,29 @@ npm install && npm run dev
 | `GET` | `/api/run/{id}` | Fetch attack graph & gate status | `RunStatus` |
 | `POST` | `/api/run/{id}/regress` | Execute generated Pytest suite | `RegressionRun` |
 | `POST` | `/api/target/guard` | Toggle target hardening switch | `{enabled: boolean}` |
+
+### Sample Live Brev Telemetry Payload (`GET /api/brev/telemetry`)
+```json
+{
+  "instance_name": "mechanical-chocolate-wolf",
+  "gpu_spec": "NVIDIA L40S 48GB Tensor Core GPU",
+  "provider": "NVIDIA Brev Cloud",
+  "base_url": "http://localhost:11435/v1",
+  "active_model": "nvidia/llama-3.1-nemotron-70b-instruct",
+  "total_invocations": 42,
+  "total_prompt_tokens": 12850,
+  "total_completion_tokens": 3410,
+  "total_tokens": 16260,
+  "avg_tokens_per_request": 387.1,
+  "throughput_est_tokens_sec": 142.5,
+  "latency_avg_ms": 320,
+  "speedup_vs_cloud_api": "14.2x",
+  "purpose_breakdown": {
+    "attacker_generation": 9800,
+    "judge_evaluation": 6460
+  }
+}
+```
 
 ---
 
