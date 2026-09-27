@@ -5,7 +5,7 @@ PYTHON ?= python3
 VENV   := $(abspath $(BE)/.venv)
 PY     := $(VENV)/bin/python
 
-.PHONY: install-backend api api-live test regress openapi
+.PHONY: install-backend api api-live test regress demo-check demo-record openapi
 
 install-backend:
 	test -d $(VENV) || $(PYTHON) -m venv $(VENV)
@@ -25,6 +25,14 @@ test:
 # Runs every generated regression test against TARGET_URL (default http://localhost:8001).
 regress:
 	cd $(BE) && $(PY) -m pytest regression_tests/generated -q -p no:cacheprovider --import-mode=importlib
+
+# Pre-demo check against `make api-live` + BE1's target agent. Timings: data/demo_checks.jsonl.
+demo-check:
+	cd $(BE) && $(PY) -m gauntlet.tools.demo_check --runs 3
+
+# Same, then saves the fastest passing run as data/recorded_run/run.json (previous: run.prev.json).
+demo-record:
+	cd $(BE) && $(PY) -m gauntlet.tools.demo_check --runs 3 --save-recording
 
 # Needs `make api` running.
 openapi:
