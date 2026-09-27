@@ -19,19 +19,6 @@ services:
     depends_on:
       - target-agent
 
-  frontend:
-    build:
-      context: ./apps/frontend
-      dockerfile: Dockerfile
-      args:
-        NEXT_PUBLIC_API_URL: http://localhost:8000
-        NEXT_PUBLIC_USE_MOCKS: "false"
-    container_name: gauntlet-frontend
-    ports:
-      - "3000:3000"
-    depends_on:
-      - backend
-
   target-agent:
     build:
       context: ./apps/backend
@@ -47,11 +34,11 @@ services:
     build:
       context: ./apps/frontend
       dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: http://localhost:8000
+        NEXT_PUBLIC_USE_MOCKS: "false"
     container_name: gauntlet-frontend
     ports:
       - "3000:3000"
-    environment:
-      - NEXT_PUBLIC_API_URL=http://localhost:8000
-      - NEXT_PUBLIC_USE_MOCKS=false
     depends_on:
       - backend
