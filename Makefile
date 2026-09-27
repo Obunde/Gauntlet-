@@ -1,41 +1,31 @@
 # Gauntlet monorepo tasks. Run from the repo root.
+# Other roles add their own targets (agent, web, dev, types).
 BE     := apps/backend
-FE     := apps/frontend
 PYTHON ?= python3
 VENV   := $(abspath $(BE)/.venv)
 PY     := $(VENV)/bin/python
 
-.PHONY: install agent api web dev types regress test harden
+.PHONY: install-backend api api-live test regress openapi
 
-install:
+install-backend:
 	test -d $(VENV) || $(PYTHON) -m venv $(VENV)
 	$(PY) -m pip install --upgrade pip
 	$(PY) -m pip install -e $(BE)
-	cd $(FE) && npm install
-
-agent:
-	cd $(BE) && $(PY) -m uvicorn target_agent.app:app --port 8001
 
 api:
-	cd $(BE) && $(PY) -m uvicorn gauntlet.api.main:app --port 8000 --reload --reload-dir gauntlet
+	cd $(BE) && $(PY) -m uvicorn gauntlet.api.main:app --reload --port 8000
 
-web:
-	cd $(FE) && npm run dev
-
-dev:
-	npx --yes concurrently -n agent,api,web -c yellow,cyan,magenta "$(MAKE) agent" "$(MAKE) api" "$(MAKE) web"
-
-types:
-	npx --yes openapi-typescript http://localhost:8000/openapi.json -o $(FE)/lib/types.ts
-
-regress:
-	cd $(BE) && $(PY) -m pytest regression_tests/generated -q
+# Live mode: runs BE1's pipeline. --reload-dir keeps generated regression tests from restarting the server.
+api-live:
+	cd $(BE) && API_MODE=live $(PY) -m uvicorn gauntlet.api.main:app --reload --reload-dir gauntlet --port 8000
 
 test:
 	cd $(BE) && $(PY) -m pytest tests -q
 
-# Stops the running target agent (e.g. the one started by `make dev`) and restarts it hardened.
-harden:
-	-pkill -f "[t]arget_agent.app:app"
-	sleep 1
-	cd $(BE) && HARDENED=1 $(PY) -m uvicorn target_agent.app:app --port 8001
+# Runs every generated regression test against TARGET_URL (default http://localhost:8001).
+regress:
+	cd $(BE) && $(PY) -m pytest regression_tests/generated -q -p no:cacheprovider --import-mode=importlib
+
+# Needs `make api` running.
+openapi:
+	curl -sf localhost:8000/openapi.json > docs/openapi.json

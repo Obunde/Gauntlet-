@@ -5,7 +5,17 @@ import { useState } from "react";
 import { startRun } from "@/lib/api";
 import recorded from "@/mocks/run_mock.json";
 
-export default function RunButton({ policyId, replay }: { policyId: string; replay: boolean }) {
+export default function RunButton({
+  policyId,
+  targetUrl,
+  replay,
+  authorized,
+}: {
+  policyId: string;
+  targetUrl: string;
+  replay: boolean;
+  authorized: boolean;
+}) {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -18,7 +28,7 @@ export default function RunButton({ policyId, replay }: { policyId: string; repl
         router.push(`/runs/${recorded.run_id}?replay=1`);
         return;
       }
-      const { run_id } = await startRun(policyId);
+      const { run_id } = await startRun(policyId, targetUrl || undefined);
       router.push(`/runs/${run_id}`);
     } catch (e) {
       setError(String(e));
@@ -30,12 +40,13 @@ export default function RunButton({ policyId, replay }: { policyId: string; repl
     <div>
       <button
         onClick={onClick}
-        disabled={busy || !policyId}
-        className="rounded-lg bg-white px-6 py-3 font-semibold text-neutral-950 transition hover:bg-neutral-200 disabled:opacity-50"
+        disabled={busy || !policyId || !authorized || (!replay && !targetUrl)}
+        className="primary-button"
       >
-        {busy ? "Starting…" : replay ? "Replay recorded run" : "Run Gauntlet"}
+        <span>{busy ? "Starting…" : replay ? "Replay recorded run" : "Run security scan"}</span>
+        {!busy && <span aria-hidden>→</span>}
       </button>
-      {error && <p className="mt-2 text-sm text-red-400">{error}</p>}
+      {error && <p className="mt-2 max-w-sm text-xs text-rose-300">{error}</p>}
     </div>
   );
 }

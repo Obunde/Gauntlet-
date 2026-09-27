@@ -2,7 +2,9 @@ import runMock from "@/mocks/run_mock.json";
 import type { RegressResponse, RunStarted, RunStatus } from "./types";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
-export const USE_MOCKS = process.env.NEXT_PUBLIC_USE_MOCKS === "true";
+// Frontend work must remain usable while the backend is being integrated.
+// Opt into live requests explicitly with NEXT_PUBLIC_USE_MOCKS=false.
+export const USE_MOCKS = process.env.NEXT_PUBLIC_USE_MOCKS !== "false";
 
 const mockRun = runMock as RunStatus;
 const delay = (ms = 400) => new Promise((r) => setTimeout(r, ms));

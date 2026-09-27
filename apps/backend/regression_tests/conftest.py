@@ -1,12 +1,18 @@
-"""Shared fixtures for generated regression tests. Owner: BE2."""
-import pytest
+"""Fixtures for generated regression tests (regression_tests/generated/<run_id>/). Owner: BE2."""
+import os
 
-from gauntlet.pipeline import target_client
-from gauntlet.shared import config
+import httpx
+import pytest
 
 
 @pytest.fixture
 def send():
-    """send(prompt) -> {response, tool_calls} against TARGET_URL."""
-    url = config.target_url()
-    return lambda prompt: target_client.send(url, prompt)
+    """send(prompt) -> {response, tool_calls} from the target agent at TARGET_URL."""
+    url = os.environ.get("TARGET_URL", "http://localhost:8001").rstrip("/") + "/chat"
+
+    def _send(prompt: str) -> dict:
+        resp = httpx.post(url, json={"message": prompt}, timeout=15)
+        resp.raise_for_status()
+        return resp.json()
+
+    return _send
