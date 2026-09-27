@@ -45,7 +45,11 @@ def run_pipeline(run_id: str, policy_id: str, target_url: str) -> None:
         run.gate = gate.decide(run.attacks)
         run.regression_tests = [regression.generate(a, policy) for a in run.attacks if a.judge.succeeded]
         run.status = "done"
-    except Exception:
+        run.completed_at = _now()
+    except Exception as exc:
         log.exception("Run %s failed", run_id)
         run.status = "error"
+        run.error = str(exc)
+        run.completed_at = _now()
     trace_store.save_run(run)
+
