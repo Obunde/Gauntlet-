@@ -4,25 +4,38 @@ import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { useAuth } from "@/lib/AuthContext";
 
 export default function LandingPage() {
   const router = useRouter();
+  const { user, isAuthenticated, login } = useAuth();
   const [showKeycloakModal, setShowKeycloakModal] = useState(false);
-  const [authenticated, setAuthenticated] = useState(false);
   const [username, setUsername] = useState("admin@gauntlet.internal");
   const [password, setPassword] = useState("Gauntlet2026!");
-  const [authRole, setAuthRole] = useState("Security Engineer (Admin)");
   const [loginError, setLoginError] = useState<string | null>(null);
+
+  const handleFillDemo = () => {
+    setUsername("admin@gauntlet.internal");
+    setPassword("Gauntlet2026!");
+    setLoginError(null);
+  };
 
   const handleKeycloakLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!username || !password) {
+    if (!username.trim() || !password.trim()) {
       setLoginError("Please provide both username and password.");
       return;
     }
-    setAuthenticated(true);
+    login(username, "Security Engineer (Admin)");
     setShowKeycloakModal(false);
     setLoginError(null);
+    router.push("/dashboard");
+  };
+
+  const handleLaunchConsole = () => {
+    if (!isAuthenticated) {
+      login("admin@gauntlet.internal", "Security Engineer (Admin)");
+    }
     router.push("/dashboard");
   };
 
@@ -41,10 +54,10 @@ export default function LandingPage() {
         </div>
 
         <div className="flex items-center gap-4">
-          {authenticated ? (
+          {isAuthenticated && user ? (
             <div className="flex items-center gap-3 bg-emerald-50 border border-emerald-200 rounded-xl px-4 py-2 text-xs font-mono text-emerald-700 font-bold">
               <span className="h-2 w-2 rounded-full bg-emerald-500 animate-ping" />
-              <span>Keycloak Auth Active ({authRole})</span>
+              <span>Keycloak SSO Active ({user.username})</span>
             </div>
           ) : (
             <button
@@ -56,9 +69,9 @@ export default function LandingPage() {
             </button>
           )}
 
-          <Link href="/dashboard" className="primary-button text-xs font-bold shadow-md">
+          <button onClick={handleLaunchConsole} className="primary-button text-xs font-bold shadow-md cursor-pointer">
             Launch Console →
-          </Link>
+          </button>
         </div>
       </nav>
 
@@ -80,15 +93,17 @@ export default function LandingPage() {
         </p>
 
         <div className="flex flex-wrap items-center justify-center gap-4 pt-2">
-          <Link href="/dashboard" className="primary-button text-base px-8 py-3.5 font-extrabold shadow-lg">
+          <button onClick={handleLaunchConsole} className="primary-button text-base px-8 py-3.5 font-extrabold shadow-lg cursor-pointer">
             Enter Security Console →
-          </Link>
-          <button
-            onClick={() => setShowKeycloakModal(true)}
-            className="secondary-button text-base px-7 py-3.5 font-bold border-slate-300 hover:border-sky-500"
-          >
-            🔐 Keycloak Enterprise Login
           </button>
+          {!isAuthenticated && (
+            <button
+              onClick={() => setShowKeycloakModal(true)}
+              className="secondary-button text-base px-7 py-3.5 font-bold border-slate-300 hover:border-sky-500 cursor-pointer"
+            >
+              🔐 Keycloak Enterprise Login
+            </button>
+          )}
         </div>
 
         {/* Product Architecture Hero Image Showcase */}
@@ -130,59 +145,54 @@ export default function LandingPage() {
               </button>
             </div>
 
+            {/* Quick Demo Autofill Notice */}
+            <div className="flex items-center justify-between p-3 rounded-xl border border-sky-200 bg-sky-50 text-xs">
+              <span className="text-slate-700 font-semibold">Demo credentials pre-filled</span>
+              <button
+                type="button"
+                onClick={handleFillDemo}
+                className="text-[11px] font-mono font-bold text-sky-700 bg-white hover:bg-sky-100 px-3 py-1 rounded-lg border border-sky-300 transition-colors shadow-xs cursor-pointer"
+              >
+                Fill Demo
+              </button>
+            </div>
+
             <form onSubmit={handleKeycloakLogin} className="space-y-4">
-              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 space-y-3">
-                <label className="block text-xs font-bold text-slate-900 uppercase">
+              <div>
+                <label className="block text-xs font-bold text-slate-900 uppercase mb-1">
                   Username / Email
-                  <input
-                    type="text"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                    className="w-full rounded-xl border-2 border-slate-300 bg-white px-3.5 py-2.5 text-xs text-slate-900 font-mono mt-1 focus:border-sky-600 focus:outline-none"
-                    placeholder="admin@gauntlet.internal"
-                    required
-                  />
                 </label>
+                <input
+                  type="text"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  className="w-full rounded-xl border-2 border-slate-300 bg-white px-3.5 py-2.5 text-xs text-slate-900 font-mono focus:border-sky-600 focus:outline-none"
+                  placeholder="admin@gauntlet.internal"
+                  required
+                />
+              </div>
 
-                <label className="block text-xs font-bold text-slate-900 uppercase">
+              <div>
+                <label className="block text-xs font-bold text-slate-900 uppercase mb-1">
                   Password
-                  <input
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="w-full rounded-xl border-2 border-slate-300 bg-white px-3.5 py-2.5 text-xs text-slate-900 font-mono mt-1 focus:border-sky-600 focus:outline-none"
-                    placeholder="••••••••••••"
-                    required
-                  />
                 </label>
-
-                <label className="block text-xs font-bold text-slate-900 uppercase">
-                  Role Assignment
-                  <select
-                    value={authRole}
-                    onChange={(e) => setAuthRole(e.target.value)}
-                    className="w-full rounded-xl border-2 border-slate-300 bg-white px-3.5 py-2.5 text-xs text-slate-900 font-mono mt-1 focus:border-sky-600 focus:outline-none"
-                  >
-                    <option value="Security Engineer (Admin)">Security Engineer (Admin)</option>
-                    <option value="DevOps Lead">DevOps Lead</option>
-                    <option value="AI Compliance Auditor">AI Compliance Auditor</option>
-                  </select>
-                </label>
-
-                <div className="rounded-xl bg-sky-50 border border-sky-200 p-3 text-[11px] text-slate-700 font-mono">
-                  🔑 <strong>Demo Credentials:</strong><br />
-                  User: <span className="text-slate-900 font-bold">admin@gauntlet.internal</span><br />
-                  Pass: <span className="text-slate-900 font-bold">Gauntlet2026!</span>
-                </div>
+                <input
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full rounded-xl border-2 border-slate-300 bg-white px-3.5 py-2.5 text-xs text-slate-900 font-mono focus:border-sky-600 focus:outline-none"
+                  placeholder="••••••••••••"
+                  required
+                />
               </div>
 
               {loginError && <p className="text-xs text-rose-600 font-mono font-bold">{loginError}</p>}
 
               <button
                 type="submit"
-                className="w-full primary-button py-3 text-sm font-bold shadow-md cursor-pointer"
+                className="w-full primary-button py-3 text-sm font-bold shadow-md cursor-pointer mt-1"
               >
-                Sign in with Keycloak SSO
+                Sign in with Keycloak SSO →
               </button>
             </form>
 

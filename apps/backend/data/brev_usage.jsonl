@@ -1,0 +1,14 @@
+{"time": "2026-09-27T11:40:41+00:00", "model": "llama3.1", "purpose": "judge", "prompt_tokens": 511, "completion_tokens": 50, "total_tokens": 561}
+{"time": "2026-09-27T11:40:42+00:00", "model": "llama3.1", "purpose": "judge", "prompt_tokens": 506, "completion_tokens": 50, "total_tokens": 556}
+{"time": "2026-09-27T11:40:43+00:00", "model": "llama3.1", "purpose": "judge", "prompt_tokens": 515, "completion_tokens": 57, "total_tokens": 572}
+{"time": "2026-09-27T11:40:44+00:00", "model": "llama3.1", "purpose": "judge", "prompt_tokens": 509, "completion_tokens": 50, "total_tokens": 559}
+{"time": "2026-09-27T11:40:45+00:00", "model": "llama3.1", "purpose": "judge", "prompt_tokens": 517, "completion_tokens": 50, "total_tokens": 567}
+{"time": "2026-09-27T11:40:45+00:00", "model": "llama3.1", "purpose": "judge", "prompt_tokens": 530, "completion_tokens": 51, "total_tokens": 581}
+{"time": "2026-09-27T11:40:46+00:00", "model": "llama3.1", "purpose": "judge", "prompt_tokens": 522, "completion_tokens": 50, "total_tokens": 572}
+{"time": "2026-09-27T11:40:47+00:00", "model": "llama3.1", "purpose": "judge", "prompt_tokens": 529, "completion_tokens": 41, "total_tokens": 570}
+{"time": "2026-09-27T11:40:47+00:00", "model": "llama3.1", "purpose": "judge", "prompt_tokens": 511, "completion_tokens": 41, "total_tokens": 552}
+{"time": "2026-09-27T11:40:48+00:00", "model": "llama3.1", "purpose": "judge", "prompt_tokens": 506, "completion_tokens": 50, "total_tokens": 556}
+{"time": "2026-09-27T11:40:49+00:00", "model": "llama3.1", "purpose": "judge", "prompt_tokens": 522, "completion_tokens": 50, "total_tokens": 572}
+{"time": "2026-09-27T11:40:50+00:00", "model": "llama3.1", "purpose": "judge", "prompt_tokens": 522, "completion_tokens": 56, "total_tokens": 578}
+{"time": "2026-09-27T11:40:51+00:00", "model": "llama3.1", "purpose": "judge", "prompt_tokens": 515, "completion_tokens": 57, "total_tokens": 572}
+{"time": "2026-09-27T11:40:51+00:00", "model": "llama3.1", "purpose": "judge", "prompt_tokens": 509, "completion_tokens": 50, "total_tokens": 559}

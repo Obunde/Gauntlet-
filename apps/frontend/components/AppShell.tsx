@@ -12,7 +12,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   const { user, isAuthenticated, logout } = useAuth();
 
   const isLoginPage = pathname === "/login";
-  const isLandingPage = pathname === "/landing";
+  const isLandingPage = pathname === "/" || pathname === "/landing";
 
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", "light");
@@ -63,24 +63,24 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
 
           <nav className="space-y-2" aria-label="Primary navigation">
             <Link
-              href="/dashboard"
-              className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-bold transition-all ${
-                pathname === "/dashboard" || pathname === "/"
-                  ? "bg-sky-50 text-sky-700 border-l-4 border-sky-600 shadow-sm"
-                  : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
-              }`}
-            >
-              <span className="text-lg">⌂</span> Console Dashboard
-            </Link>
-            <Link
-              href="/landing"
+              href="/"
               className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold transition-all ${
-                pathname === "/landing"
+                pathname === "/" || pathname === "/landing"
                   ? "bg-sky-50 text-sky-700 border-l-4 border-sky-600 shadow-sm"
                   : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
               }`}
             >
               <span className="text-lg">✨</span> Product Overview
+            </Link>
+            <Link
+              href="/dashboard"
+              className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-bold transition-all ${
+                pathname === "/dashboard"
+                  ? "bg-sky-50 text-sky-700 border-l-4 border-sky-600 shadow-sm"
+                  : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+              }`}
+            >
+              <span className="text-lg">⌂</span> Console Dashboard
             </Link>
             <Link
               href={`/runs/${recorded.run_id}?replay=1`}

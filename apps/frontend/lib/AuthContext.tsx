@@ -73,7 +73,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         logout,
       }}
     >
-      {initialized ? children : <div className="min-h-screen bg-[#050810]" />}
+      {initialized ? children : <div className="min-h-screen bg-slate-50" />}
     </AuthContext.Provider>
   );
 }
