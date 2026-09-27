@@ -1,5 +1,5 @@
 import runMock from "@/mocks/run_mock.json";
-import type { RegressResponse, RunStarted, RunStatus } from "./types";
+import type { BrevTelemetryResponse, RegressResponse, RunStarted, RunStatus } from "./types";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 // Frontend work must remain usable while the backend is being integrated.
@@ -10,12 +10,19 @@ const mockRun = runMock as RunStatus;
 const delay = (ms = 400) => new Promise((r) => setTimeout(r, ms));
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
-  const res = await fetch(`${API_URL}${path}`, {
-    ...init,
-    headers: { "Content-Type": "application/json", ...init?.headers },
-  });
-  if (!res.ok) throw new Error(`${init?.method ?? "GET"} ${path} failed: ${res.status}`);
-  return res.json() as Promise<T>;
+  try {
+    const res = await fetch(`${API_URL}${path}`, {
+      ...init,
+      headers: { "Content-Type": "application/json", ...init?.headers },
+    });
+    if (!res.ok) throw new Error(`${init?.method ?? "GET"} ${path} failed: ${res.status}`);
+    return res.json() as Promise<T>;
+  } catch (err: any) {
+    if (err.name === "TypeError" && err.message.includes("fetch")) {
+      throw new Error(`Cannot reach Backend API at ${API_URL}. Ensure 'brev port-forward' is running or check network connection.`);
+    }
+    throw err;
+  }
 }
 
 export async function getPolicies(): Promise<string[]> {
@@ -59,7 +66,7 @@ export async function setTargetGuard(hardened: boolean): Promise<{ hardened: boo
   });
 }
 
-export async function getBrevTelemetry() {
+export async function getBrevTelemetry(): Promise<BrevTelemetryResponse> {
   if (USE_MOCKS) {
     return {
       instance_name: "mechanical-chocolate-wolf",
@@ -78,7 +85,7 @@ export async function getBrevTelemetry() {
       purpose_breakdown: { attacker_generation: 9800, judge_evaluation: 6460 }
     };
   }
-  return request("/api/brev/telemetry");
+  return request<BrevTelemetryResponse>("/api/brev/telemetry");
 }
 
 
