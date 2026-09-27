@@ -13,7 +13,7 @@ import { getPolicies } from "@/lib/api";
 export default function DashboardPage() {
   const [policies, setPolicies] = useState<string[]>([]);
   const [policyId, setPolicyId] = useState("");
-  const [targetUrl, setTargetUrl] = useState("http://localhost:8001/chat");
+  const [targetUrl, setTargetUrl] = useState(process.env.NEXT_PUBLIC_TARGET_URL || "http://localhost:8001/chat");
   const [authorized, setAuthorized] = useState(true);
   const [replay, setReplay] = useState(false);
   const [error, setError] = useState<string | null>(null);
