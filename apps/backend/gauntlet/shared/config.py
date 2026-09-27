@@ -6,7 +6,8 @@ from pathlib import Path
 from dotenv import load_dotenv
 
 BACKEND_DIR = Path(__file__).resolve().parents[2]
-REPO_ROOT = BACKEND_DIR.parents[1]
+REPO_ROOT = BACKEND_DIR.parents[1] if len(BACKEND_DIR.parents) > 1 else BACKEND_DIR
+
 
 POLICIES_DIR = BACKEND_DIR / "policies"
 DATA_DIR = BACKEND_DIR / "data"
