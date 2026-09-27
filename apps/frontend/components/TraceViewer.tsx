@@ -9,13 +9,23 @@ export default function TraceViewer({ attack }: { attack: AttackRecord }) {
   ];
 
   return (
-    <ol className="surface overflow-hidden">
+    <ol className="panel overflow-hidden p-0 border border-slate-200 bg-white rounded-2xl shadow-xs divide-y divide-slate-200">
       {steps.map((step, index) => (
-        <li key={step.label} className="grid grid-cols-[28px_1fr] gap-3 border-b border-zinc-800 p-4 last:border-0 sm:p-5">
-          <span className="grid h-7 w-7 place-items-center rounded-full border border-zinc-700 bg-zinc-900 mono text-[10px] text-zinc-500">{index + 1}</span>
-          <div className="min-w-0">
-            <p className="section-label">{step.label}</p>
-            <pre className={`mt-2 whitespace-pre-wrap break-words font-sans text-sm leading-6 ${step.label === "Tool calls" && attack.tool_calls.length ? "result-red mono" : "text-zinc-300"}`}>{step.content}</pre>
+        <li key={step.label} className="grid grid-cols-[36px_1fr] gap-4 p-5 sm:p-6 bg-white hover:bg-slate-50/50 transition-colors">
+          <span className="grid h-8 w-8 place-items-center rounded-xl border border-sky-200 bg-sky-50 mono text-xs font-bold text-sky-800 shadow-2xs">
+            {index + 1}
+          </span>
+          <div className="min-w-0 space-y-2">
+            <p className="eyebrow text-sky-700 font-mono font-extrabold">{step.label}</p>
+            <pre
+              className={`whitespace-pre-wrap break-words font-mono text-xs leading-relaxed p-3.5 rounded-xl border ${
+                step.label === "Tool calls" && attack.tool_calls.length
+                  ? "bg-rose-50 text-rose-900 border-rose-200 font-bold"
+                  : "bg-slate-50 text-slate-900 border-slate-200 font-semibold"
+              }`}
+            >
+              {step.content}
+            </pre>
           </div>
         </li>
       ))}
