@@ -19,6 +19,26 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
     }
   }, [isAuthenticated, isLoginPage, router]);
 
+  const [theme, setTheme] = useState<"light" | "dark">("light");
+
+  useEffect(() => {
+    const saved = localStorage.getItem("gauntlet-theme");
+    if (saved === "dark") {
+      setTheme("dark");
+      document.documentElement.setAttribute("data-theme", "dark");
+    } else {
+      setTheme("light");
+      document.documentElement.setAttribute("data-theme", "light");
+    }
+  }, []);
+
+  const toggleTheme = () => {
+    const nextTheme = theme === "light" ? "dark" : "light";
+    setTheme(nextTheme);
+    localStorage.setItem("gauntlet-theme", nextTheme);
+    document.documentElement.setAttribute("data-theme", nextTheme);
+  };
+
   const handleLogout = () => {
     logout();
     router.replace("/login");
@@ -96,7 +116,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
 
       {/* Main Content Area */}
       <main className="min-w-0 lg:col-start-2">
-        {/* Top Header Bar with Sign Out option */}
+        {/* Top Header Bar with Sign Out & Theme Toggle */}
         <header className="sticky top-0 z-30 flex items-center justify-between border-b border-white/10 bg-[#080b12]/80 px-6 py-3.5 backdrop-blur-md">
           <div className="flex items-center gap-2 text-xs font-mono text-slate-400">
             <span className="text-cyan-400 font-bold">GAUNTLET SYSTEM</span>
@@ -105,6 +125,14 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
           </div>
 
           <div className="flex items-center gap-3">
+            <button
+              onClick={toggleTheme}
+              className="text-xs font-mono font-bold text-cyan-300 hover:text-cyan-200 bg-cyan-500/10 border border-cyan-500/30 rounded-lg px-3 py-1.5 flex items-center gap-1.5 transition-colors shadow-sm"
+              title="Toggle Light / Dark Theme"
+            >
+              <span>{theme === "light" ? "🌙 Dark Mode" : "☀️ Light Mode"}</span>
+            </button>
+
             <div className="hidden sm:flex items-center gap-2 rounded-full bg-emerald-500/10 border border-emerald-500/30 px-3 py-1 text-xs font-mono text-emerald-300">
               <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
               <span>Keycloak Authenticated</span>
@@ -123,4 +151,5 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
       </main>
     </div>
   );
+
 }

@@ -18,14 +18,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               (function() {
                 try {
                   var saved = localStorage.getItem('gauntlet-theme');
-                  if (saved === 'light' || saved === 'dark') {
-                    document.documentElement.setAttribute('data-theme', saved);
-                  } else if (window.matchMedia('(prefers-color-scheme: light)').matches) {
-                    document.documentElement.setAttribute('data-theme', 'light');
-                  } else {
+                  if (saved === 'dark') {
                     document.documentElement.setAttribute('data-theme', 'dark');
+                  } else {
+                    document.documentElement.setAttribute('data-theme', 'light');
                   }
-                } catch (e) {}
+                } catch (e) {
+                  document.documentElement.setAttribute('data-theme', 'light');
+                }
               })();
             `,
           }}
