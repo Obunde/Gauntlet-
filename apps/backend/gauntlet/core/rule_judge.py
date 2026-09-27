@@ -28,3 +28,7 @@ def rule_judge(policy: Policy, tool_calls: list[str]) -> JudgeVerdict:
         reasoning="No forbidden tool was called.",
         violated_rule=None,
     )
+
+
+# BE1's engine/judge.py calls rule_judge.judge(...); keep that name working.
+judge = rule_judge

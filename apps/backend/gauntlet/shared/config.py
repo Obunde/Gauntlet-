@@ -1,8 +1,7 @@
-"""Paths and environment settings, loaded once from apps/backend/.env."""
+"""Paths and environment settings. apps/backend/.env is loaded once; values are read on each
+call so tests and `make api-live` can change them without re-importing."""
 import os
 from pathlib import Path
-from typing import Literal
-
 from dotenv import load_dotenv
 
 BACKEND_DIR = Path(__file__).resolve().parents[2]
@@ -15,6 +14,8 @@ RECORDED_RUN_PATH = DATA_DIR / "recorded_run" / "run.json"
 REGRESSION_DIR = BACKEND_DIR / "regression_tests"
 GENERATED_TESTS_DIR = REGRESSION_DIR / "generated"
 BREV_USAGE_FILE = DATA_DIR / "brev_usage.jsonl"
+FALLBACK_ATTACKS_FILE = BACKEND_DIR / "fallback" / "attacks.json"
+PROMPTS_DIR = BACKEND_DIR / "gauntlet" / "engine" / "prompts"
 
 load_dotenv(BACKEND_DIR / ".env")
 
@@ -24,8 +25,17 @@ def env(key: str, default: str = "") -> str:
     return os.getenv(key, default)
 
 
+def flag(key: str) -> bool:
+    """True when the variable is set to 1 (e.g. USE_RULE_JUDGE=1)."""
+    return os.getenv(key, "0").strip() == "1"
+
+
 def api_mode() -> str:
-    return os.getenv("API_MODE", "live").strip()
+    """'mock' (default) or 'live'."""
+    mode = os.getenv("API_MODE", "mock").strip()
+    if mode not in ("mock", "live"):
+        raise ValueError(f"API_MODE must be 'mock' or 'live', got {mode!r}")
+    return mode
 
 
 def cors_origins() -> list[str]:
