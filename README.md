@@ -326,11 +326,11 @@ python3 -m pytest tests/ -v
 
 | Role | Name | Responsibilities |
 | :--- | :--- | :--- |
-| **BE1 (AI Engine)** | Team Member | Brev LLM Attacker Engine, Brev Judge Engine, Brev Telemetry |
-| **BE2 (Logic Backend)** | Team Member | Policy Parser, Gate Logic, Regression Generator, FastAPI |
-| **FE1 (Dashboard)** | Team Member | Main Run View, RED/GREEN Status Badge, Attack List |
-| **FE2 (Detail Views)** | Team Member | Trace Viewer, Regression Test Display & Download |
-| **PD (Pipeline/Integrator)**| Team Member | Brev Setup, Sandbox Target Agent, End-to-End Orchestration |
+| **BE1 (AI Engine)** | Tristan | Brev LLM Attacker Engine, Brev Judge Engine, Brev Telemetry |
+| **BE2 (Logic Backend)** | Eugene | Policy Parser, Gate Logic, Regression Generator, FastAPI |
+| **FE1 (Dashboard)** | Ingrid | Main Run View, RED/GREEN Status Badge, Attack List |
+| **FE2 (Detail Views)** | Lameck | Trace Viewer, Regression Test Display & Download |
+| **PD (Pipeline/Integrator)**| Silas | Brev Setup, Sandbox Target Agent, End-to-End Orchestration |
 
 ---
 
