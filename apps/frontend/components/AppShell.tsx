@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import Link from "next/link";
 import { useAuth } from "@/lib/AuthContext";
 import recorded from "@/mocks/run_mock.json";
@@ -12,49 +12,34 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   const { user, isAuthenticated, logout } = useAuth();
 
   const isLoginPage = pathname === "/login";
+  const isLandingPage = pathname === "/landing";
 
   useEffect(() => {
-    if (!isAuthenticated && !isLoginPage) {
-      router.replace("/login");
-    }
-  }, [isAuthenticated, isLoginPage, router]);
-
-  const [theme, setTheme] = useState<"light" | "dark">("light");
-
-  useEffect(() => {
-    const saved = localStorage.getItem("gauntlet-theme");
-    if (saved === "dark") {
-      setTheme("dark");
-      document.documentElement.setAttribute("data-theme", "dark");
-    } else {
-      setTheme("light");
-      document.documentElement.setAttribute("data-theme", "light");
-    }
+    document.documentElement.setAttribute("data-theme", "light");
   }, []);
 
-  const toggleTheme = () => {
-    const nextTheme = theme === "light" ? "dark" : "light";
-    setTheme(nextTheme);
-    localStorage.setItem("gauntlet-theme", nextTheme);
-    document.documentElement.setAttribute("data-theme", nextTheme);
-  };
+  useEffect(() => {
+    if (!isAuthenticated && !isLoginPage && !isLandingPage) {
+      router.replace("/login");
+    }
+  }, [isAuthenticated, isLoginPage, isLandingPage, router]);
 
   const handleLogout = () => {
     logout();
     router.replace("/login");
   };
 
-  // On Login page, render children full-screen without sidebar
-  if (isLoginPage) {
-    return <main className="min-h-screen bg-[#050810] text-slate-100">{children}</main>;
+  // On Login page or Landing page, render children full-screen without sidebar
+  if (isLoginPage || isLandingPage) {
+    return <main className="min-h-screen bg-slate-50 text-slate-900">{children}</main>;
   }
 
-  // If redirecting to login, render dark loading background
+  // If redirecting to login, render loading background
   if (!isAuthenticated || !user) {
     return (
-      <div className="min-h-screen grid place-items-center bg-[#050810] text-cyan-400 font-mono text-sm">
+      <div className="min-h-screen grid place-items-center bg-slate-50 text-sky-700 font-mono text-sm">
         <div className="flex items-center gap-3">
-          <span className="h-3 w-3 rounded-full bg-cyan-400 animate-ping" />
+          <span className="h-3 w-3 rounded-full bg-sky-600 animate-ping" />
           Authenticating with Keycloak SSO...
         </div>
       </div>
@@ -62,52 +47,70 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className="min-h-screen lg:grid lg:grid-cols-[260px_minmax(0,1fr)] bg-[#050810]">
+    <div className="min-h-screen lg:grid lg:grid-cols-[260px_minmax(0,1fr)] bg-slate-50 text-slate-900">
       {/* Sidebar Navigation */}
-      <aside className="border-b border-white/10 bg-[#080b12]/95 px-5 py-5 backdrop-blur lg:fixed lg:inset-y-0 lg:w-[260px] lg:border-b-0 lg:border-r flex flex-col justify-between">
+      <aside className="border-b border-slate-200 bg-white px-5 py-6 lg:fixed lg:inset-y-0 lg:w-[260px] lg:border-b-0 lg:border-r flex flex-col justify-between shadow-sm">
         <div className="space-y-6">
           <Link href="/dashboard" className="flex items-center gap-3 group">
-            <span className="grid h-10 w-10 place-items-center rounded-xl border border-cyan-300/30 bg-cyan-300/10 text-cyan-200 text-xl shadow-[0_0_25px_rgba(103,232,249,0.15)] font-bold group-hover:scale-105 transition-transform">
+            <span className="grid h-10 w-10 place-items-center rounded-xl border border-sky-500/30 bg-sky-600 text-white text-xl shadow-md font-bold group-hover:scale-105 transition-transform">
               ◇
             </span>
             <div>
-              <strong className="block text-base tracking-tight text-white group-hover:text-cyan-300 transition-colors">Gauntlet</strong>
-              <span className="block text-xs font-mono text-cyan-400">AI release gate</span>
+              <strong className="block text-base tracking-tight text-slate-900 group-hover:text-sky-700 transition-colors">Gauntlet</strong>
+              <span className="block text-xs font-mono text-sky-700 font-bold">AI Security Release Gate</span>
             </div>
           </Link>
 
-          <nav className="space-y-1.5" aria-label="Primary navigation">
+          <nav className="space-y-2" aria-label="Primary navigation">
             <Link
               href="/dashboard"
-              className={`nav-link font-bold ${pathname === "/dashboard" || pathname === "/" ? "bg-cyan-500/15 text-cyan-300 border-l-2 border-cyan-400 pl-3" : "text-slate-300 hover:text-white"}`}
+              className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-bold transition-all ${
+                pathname === "/dashboard" || pathname === "/"
+                  ? "bg-sky-50 text-sky-700 border-l-4 border-sky-600 shadow-sm"
+                  : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+              }`}
             >
-              <span>⌂</span> Console Dashboard
+              <span className="text-lg">⌂</span> Console Dashboard
+            </Link>
+            <Link
+              href="/landing"
+              className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold transition-all ${
+                pathname === "/landing"
+                  ? "bg-sky-50 text-sky-700 border-l-4 border-sky-600 shadow-sm"
+                  : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+              }`}
+            >
+              <span className="text-lg">✨</span> Product Overview
             </Link>
             <Link
               href={`/runs/${recorded.run_id}?replay=1`}
-              className={`nav-link ${pathname.startsWith("/runs") ? "bg-cyan-500/15 text-cyan-300 border-l-2 border-cyan-400 pl-3" : "text-slate-400 hover:text-slate-200"}`}
+              className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold transition-all ${
+                pathname.startsWith("/runs")
+                  ? "bg-sky-50 text-sky-700 border-l-4 border-sky-600 shadow-sm"
+                  : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+              }`}
             >
-              <span>↻</span> Recorded Run
+              <span className="text-lg">↻</span> Recorded Audit Run
             </Link>
           </nav>
         </div>
 
         {/* User Profile Card & Sign Out */}
-        <div className="mt-6 space-y-3 pt-4 border-t border-white/10">
-          <div className="rounded-xl border border-cyan-500/20 bg-cyan-950/30 p-3.5 space-y-2">
+        <div className="mt-6 space-y-3 pt-4 border-t border-slate-200">
+          <div className="rounded-xl border border-sky-200 bg-sky-50/80 p-3.5 space-y-1">
             <div className="flex items-center justify-between">
-              <span className="eyebrow text-cyan-400 text-[10px]">LOGGED IN USER</span>
-              <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+              <span className="text-[10px] font-extrabold uppercase tracking-wider text-sky-800 font-mono">AUTHENTICATED USER</span>
+              <span className="h-2.5 w-2.5 rounded-full bg-emerald-500 shadow-[0_0_8px_#10b981]" />
             </div>
             <div>
-              <p className="text-xs font-bold text-white truncate">{user?.username}</p>
-              <p className="text-[11px] font-mono text-slate-400 truncate">{user?.role}</p>
+              <p className="text-xs font-bold text-slate-900 truncate">{user?.username}</p>
+              <p className="text-[11px] font-mono text-slate-600 truncate">{user?.role}</p>
             </div>
           </div>
 
           <button
             onClick={handleLogout}
-            className="w-full flex items-center justify-center gap-2 rounded-xl border border-rose-500/30 bg-rose-500/10 px-4 py-2.5 text-xs font-bold text-rose-300 hover:bg-rose-500/20 hover:border-rose-500/50 transition-all shadow-md"
+            className="w-full flex items-center justify-center gap-2 rounded-xl border border-rose-200 bg-rose-50 px-4 py-2.5 text-xs font-bold text-rose-700 hover:bg-rose-100 hover:border-rose-300 transition-all shadow-sm cursor-pointer"
           >
             <span>🚪</span> Sign Out / Log Out
           </button>
@@ -116,31 +119,23 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
 
       {/* Main Content Area */}
       <main className="min-w-0 lg:col-start-2">
-        {/* Top Header Bar with Sign Out & Theme Toggle */}
-        <header className="sticky top-0 z-30 flex items-center justify-between border-b border-white/10 bg-[#080b12]/80 px-6 py-3.5 backdrop-blur-md">
-          <div className="flex items-center gap-2 text-xs font-mono text-slate-400">
-            <span className="text-cyan-400 font-bold">GAUNTLET SYSTEM</span>
+        {/* Top Header Bar */}
+        <header className="sticky top-0 z-30 flex items-center justify-between border-b border-slate-200 bg-white/95 px-6 py-4 backdrop-blur-md shadow-xs">
+          <div className="flex items-center gap-2 text-xs font-mono text-slate-500 font-bold">
+            <span className="text-sky-700 uppercase tracking-wider">GAUNTLET RELEASE GATE</span>
             <span>/</span>
-            <span className="text-slate-200">{pathname === "/" ? "Overview" : pathname === "/dashboard" ? "Dashboard" : "Console"}</span>
+            <span className="text-slate-900">{pathname === "/" ? "Overview" : pathname === "/dashboard" ? "Dashboard" : pathname === "/landing" ? "Product Overview" : "Console Audit"}</span>
           </div>
 
           <div className="flex items-center gap-3">
-            <button
-              onClick={toggleTheme}
-              className="text-xs font-mono font-bold text-cyan-300 hover:text-cyan-200 bg-cyan-500/10 border border-cyan-500/30 rounded-lg px-3 py-1.5 flex items-center gap-1.5 transition-colors shadow-sm"
-              title="Toggle Light / Dark Theme"
-            >
-              <span>{theme === "light" ? "🌙 Dark Mode" : "☀️ Light Mode"}</span>
-            </button>
-
-            <div className="hidden sm:flex items-center gap-2 rounded-full bg-emerald-500/10 border border-emerald-500/30 px-3 py-1 text-xs font-mono text-emerald-300">
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
-              <span>Keycloak Authenticated</span>
+            <div className="hidden sm:flex items-center gap-2 rounded-full bg-emerald-50 border border-emerald-200 px-3 py-1 text-xs font-mono font-bold text-emerald-700">
+              <span className="h-2 w-2 rounded-full bg-emerald-500" />
+              <span>Keycloak Enterprise SSO</span>
             </div>
 
             <button
               onClick={handleLogout}
-              className="text-xs font-mono font-bold text-rose-300 hover:text-rose-200 bg-rose-500/10 border border-rose-500/30 rounded-lg px-3 py-1.5 flex items-center gap-1.5 transition-colors"
+              className="text-xs font-mono font-bold text-rose-700 hover:text-rose-800 bg-rose-50 border border-rose-200 rounded-lg px-3.5 py-1.5 flex items-center gap-1.5 transition-colors cursor-pointer"
             >
               <span>🚪</span> Log Out
             </button>
@@ -151,5 +146,4 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
       </main>
     </div>
   );
-
 }

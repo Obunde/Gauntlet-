@@ -1,22 +1,29 @@
 export default function GateBadge({ gate }: { gate: "RED" | "GREEN" | null }) {
   if (!gate) {
     return (
-      <div className="surface flex items-center justify-between gap-4 border-l-2 border-l-zinc-500 px-5 py-4">
-        <div><p className="section-label">Gate decision</p><p className="mt-1 text-sm font-medium text-zinc-300">Evaluating release candidate…</p></div>
-        <span className="rounded-md border border-zinc-700 px-2.5 py-1 text-xs font-semibold text-zinc-500">PENDING</span>
+      <div className="surface flex items-center justify-between gap-4 border-l-4 border-l-slate-400 px-6 py-5 bg-white border border-slate-200 rounded-2xl shadow-xs">
+        <div>
+          <p className="text-xs font-mono font-bold uppercase tracking-wider text-slate-500">Gate Decision</p>
+          <p className="mt-1 text-base font-bold text-slate-900">Evaluating release candidate…</p>
+        </div>
+        <span className="rounded-xl border border-slate-300 bg-slate-100 px-3.5 py-1.5 text-xs font-mono font-bold text-slate-700">PENDING</span>
       </div>
     );
   }
 
   const red = gate === "RED";
   return (
-    <div className={`surface flex items-center justify-between gap-4 border-l-2 px-5 py-4 ${red ? "border-l-red-400 bg-red-500/[0.035]" : "border-l-green-400 bg-green-500/[0.035]"}`}>
+    <div className={`surface flex items-center justify-between gap-4 border-l-4 px-6 py-5 bg-white border border-slate-200 rounded-2xl shadow-sm ${red ? "border-l-rose-600 bg-rose-50/50" : "border-l-emerald-600 bg-emerald-50/50"}`}>
       <div>
-        <p className={`section-label ${red ? "result-red" : "result-green"}`}>Gate decision</p>
-        <p className="mt-1 text-base font-semibold text-zinc-100">{red ? "Release blocked" : "Clear to ship"}</p>
-        <p className="mt-1 text-xs text-zinc-500">{red ? "A confirmed policy breach requires remediation." : "All generated security regression tests passed."}</p>
+        <p className={`text-xs font-mono font-extrabold uppercase tracking-wider ${red ? "text-rose-700" : "text-emerald-700"}`}>
+          Gate Decision
+        </p>
+        <p className="mt-1 text-lg font-black text-slate-900">{red ? "Release Blocked (Vulnerabilities Breached)" : "Clear to Ship (Hardened Security)"}</p>
+        <p className="mt-1 text-xs text-slate-600 font-medium">{red ? "A confirmed policy breach requires remediation." : "All generated security regression tests passed."}</p>
       </div>
-      <span className={`rounded-md border px-3 py-1.5 text-xs font-bold ${red ? "border-red-400/30 bg-red-500/10 result-red" : "border-green-400/30 bg-green-500/10 result-green"}`}>{gate}</span>
+      <span className={`rounded-xl border px-4 py-2 text-sm font-mono font-black ${red ? "border-rose-300 bg-rose-100 text-rose-800 shadow-xs" : "border-emerald-300 bg-emerald-100 text-emerald-800 shadow-xs"}`}>
+        GATE: {gate}
+      </span>
     </div>
   );
 }

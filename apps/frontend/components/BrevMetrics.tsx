@@ -43,59 +43,59 @@ export default function BrevMetrics() {
   };
 
   return (
-    <div className="panel p-5 space-y-4 border border-emerald-500/20 bg-gradient-to-r from-emerald-950/20 via-slate-900 to-cyan-950/20 rounded-xl shadow-lg">
-      <div className="flex items-center justify-between border-b border-white/10 pb-3">
+    <div className="panel p-6 space-y-4 border border-slate-200 bg-white rounded-2xl shadow-sm">
+      <div className="flex items-center justify-between border-b border-slate-200 pb-4">
         <div className="flex items-center gap-3">
-          <div className="h-3 w-3 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_12px_#34d399]" />
+          <div className="h-3 w-3 rounded-full bg-emerald-500 shadow-[0_0_10px_#10b981]" />
           <div>
-            <span className="text-[11px] font-mono tracking-widest text-emerald-400 font-bold uppercase">
+            <span className="text-[11px] font-mono tracking-widest text-sky-700 font-extrabold uppercase">
               POWERED BY NVIDIA BREV CLOUD
             </span>
-            <h3 className="text-sm font-bold text-white flex items-center gap-2">
+            <h3 className="text-base font-bold text-slate-900 flex items-center gap-2 mt-0.5">
               <span>{stats.gpu_spec}</span>
-              <span className="text-xs font-mono text-cyan-400 bg-cyan-950/60 border border-cyan-500/30 px-2 py-0.5 rounded">
+              <span className="text-xs font-mono text-sky-800 bg-sky-50 border border-sky-200 px-2.5 py-0.5 rounded-md font-bold">
                 {stats.instance_name}
               </span>
             </h3>
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <span className="text-xs text-emerald-300 bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/30 font-mono font-semibold">
-            ⚡ {stats.speedup_vs_cloud_api} Speedup
+          <span className="text-xs text-emerald-800 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200 font-mono font-extrabold">
+            ⚡ {stats.speedup_vs_cloud_api} Speedup vs Cloud API
           </span>
         </div>
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
-        <div className="rounded-lg border border-white/10 bg-black/40 p-3 backdrop-blur-sm">
-          <span className="block text-[10px] text-slate-400 uppercase font-mono tracking-wider">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-center pt-1">
+        <div className="rounded-xl border border-slate-200 bg-slate-50 p-3.5">
+          <span className="block text-[10px] text-slate-500 uppercase font-mono font-bold tracking-wider">
             Active LLM Model
           </span>
-          <span className="mt-1 block text-xs font-semibold text-cyan-300 truncate" title={stats.active_model}>
+          <span className="mt-1 block text-xs font-bold text-sky-800 truncate" title={stats.active_model}>
             Nemotron-70B / Llama-3.1
           </span>
         </div>
-        <div className="rounded-lg border border-white/10 bg-black/40 p-3 backdrop-blur-sm">
-          <span className="block text-[10px] text-slate-400 uppercase font-mono tracking-wider">
+        <div className="rounded-xl border border-slate-200 bg-slate-50 p-3.5">
+          <span className="block text-[10px] text-slate-500 uppercase font-mono font-bold tracking-wider">
             Avg Inference Latency
           </span>
-          <span className="mt-1 block text-xs font-bold text-emerald-400 font-mono">
+          <span className="mt-1 block text-xs font-bold text-emerald-700 font-mono">
             {stats.latency_avg_ms} ms
           </span>
         </div>
-        <div className="rounded-lg border border-white/10 bg-black/40 p-3 backdrop-blur-sm">
-          <span className="block text-[10px] text-slate-400 uppercase font-mono tracking-wider">
+        <div className="rounded-xl border border-slate-200 bg-slate-50 p-3.5">
+          <span className="block text-[10px] text-slate-500 uppercase font-mono font-bold tracking-wider">
             GPU Throughput
           </span>
-          <span className="mt-1 block text-xs font-bold text-amber-300 font-mono">
+          <span className="mt-1 block text-xs font-bold text-amber-700 font-mono">
             {stats.throughput_est_tokens_sec} Tok/sec
           </span>
         </div>
-        <div className="rounded-lg border border-white/10 bg-black/40 p-3 backdrop-blur-sm">
-          <span className="block text-[10px] text-slate-400 uppercase font-mono tracking-wider">
+        <div className="rounded-xl border border-slate-200 bg-slate-50 p-3.5">
+          <span className="block text-[10px] text-slate-500 uppercase font-mono font-bold tracking-wider">
             Live Token Counter
           </span>
-          <span className="mt-1 block text-xs font-bold text-cyan-300 font-mono">
+          <span className="mt-1 block text-xs font-bold text-sky-800 font-mono">
             {stats.total_tokens.toLocaleString()} tokens
           </span>
         </div>

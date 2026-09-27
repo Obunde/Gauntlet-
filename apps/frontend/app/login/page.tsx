@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { useAuth } from "@/lib/AuthContext";
 
 export default function LoginPage() {
@@ -11,20 +12,6 @@ export default function LoginPage() {
   const [username, setUsername] = useState("admin@gauntlet.internal");
   const [password, setPassword] = useState("Gauntlet2026!");
   const [error, setError] = useState<string | null>(null);
-  const [theme, setTheme] = useState<"dark" | "light">("dark");
-
-  useEffect(() => {
-    const saved = (localStorage.getItem("gauntlet-theme") as "dark" | "light") || "dark";
-    setTheme(saved);
-    document.documentElement.setAttribute("data-theme", saved);
-  }, []);
-
-  const toggleTheme = () => {
-    const nextTheme = theme === "light" ? "dark" : "light";
-    setTheme(nextTheme);
-    localStorage.setItem("gauntlet-theme", nextTheme);
-    document.documentElement.setAttribute("data-theme", nextTheme);
-  };
 
   const handleFillDemo = () => {
     setUsername("admin@gauntlet.internal");
@@ -44,100 +31,109 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="relative min-h-screen grid place-items-center px-4 py-12 bg-[#050810] transition-colors duration-300">
-      {/* Top Bar Theme Toggle */}
-      <div className="absolute top-5 right-5 z-20">
-        <button
-          type="button"
-          onClick={toggleTheme}
-          className="text-xs font-mono font-bold px-4 py-2 rounded-xl border border-cyan-500/40 bg-cyan-500/10 text-cyan-300 hover:bg-cyan-500/20 transition-all shadow-md flex items-center gap-2 cursor-pointer"
-        >
-          <span>{theme === "light" ? "🌙 Dark Mode" : "☀️ Light Mode"}</span>
-        </button>
-      </div>
-
-      <div className="relative w-full max-w-md space-y-8 z-10">
-        {/* Header Branding */}
-        <div className="text-center space-y-3">
-          <div className="inline-grid h-16 w-16 place-items-center rounded-2xl border border-cyan-400/40 bg-cyan-400/10 text-cyan-200 text-3xl shadow-[0_0_40px_rgba(103,232,249,0.3)] font-bold mx-auto backdrop-blur-md">
-            ◇
-          </div>
-          <div>
-            <h1 className="text-3xl font-extrabold tracking-tight text-white sm:text-4xl">Gauntlet</h1>
-            <p className="text-xs font-mono text-cyan-400 tracking-wider uppercase mt-1">
-              Enterprise AI Security Release Gate
+    <div className="min-h-screen bg-slate-50 grid place-items-center px-4 py-12 text-slate-900">
+      <div className="w-full max-w-4xl grid grid-cols-1 md:grid-cols-2 gap-8 items-center bg-white border border-slate-200 rounded-3xl p-8 shadow-xl">
+        {/* Left Hero Image Showcase */}
+        <div className="space-y-5 flex flex-col justify-between h-full bg-slate-50 border border-slate-200 rounded-2xl p-6">
+          <div className="space-y-3">
+            <div className="inline-flex h-12 w-12 place-items-center rounded-2xl bg-sky-600 text-white text-2xl font-bold shadow-md">
+              ◇
+            </div>
+            <div>
+              <h1 className="text-3xl font-black tracking-tight text-slate-900">Gauntlet</h1>
+              <p className="text-xs font-mono font-bold text-sky-700 uppercase tracking-wider mt-1">
+                Enterprise AI Security Release Gate
+              </p>
+            </div>
+            <p className="text-sm text-slate-600 leading-relaxed pt-2">
+              Automate OWASP LLM red-teaming, synthesize Pytest regression suites on NVIDIA Brev GPUs, and enforce hard RED/GREEN release decisions.
             </p>
+          </div>
+
+          <div className="relative w-full h-44 rounded-xl overflow-hidden border border-slate-200 shadow-md">
+            <Image
+              src="/release_gate.png"
+              alt="Gauntlet Release Gate"
+              fill
+              className="object-cover"
+              priority
+            />
+          </div>
+
+          <div className="pt-2 text-xs font-mono text-slate-500 border-t border-slate-200 flex justify-between items-center">
+            <span>Powered by NVIDIA Brev GPUs</span>
+            <span className="text-emerald-700 font-bold">✓ SSO Active</span>
           </div>
         </div>
 
-        {/* Login Card */}
-        <div className="rounded-2xl border border-cyan-500/40 bg-[#0c101a]/95 p-8 shadow-2xl shadow-cyan-950/80 backdrop-blur-xl space-y-6">
-          <div className="flex items-center justify-between border-b border-white/10 pb-4">
+        {/* Right Login Card */}
+        <div className="space-y-6">
+          <div className="border-b border-slate-200 pb-4">
             <div className="flex items-center gap-3">
-              <span className="grid h-9 w-9 place-items-center rounded-xl bg-cyan-500/20 text-cyan-300 font-bold text-lg">
+              <span className="grid h-10 w-10 place-items-center rounded-xl bg-sky-100 text-sky-700 font-bold text-lg border border-sky-200">
                 🔐
               </span>
               <div>
-                <h2 className="text-base font-bold text-white">Keycloak Enterprise SSO</h2>
-                <p className="text-xs text-slate-400 font-mono">Realm: gauntlet-security-realm</p>
+                <h2 className="text-xl font-bold text-slate-900">Keycloak Enterprise SSO</h2>
+                <p className="text-xs text-slate-500 font-mono">Realm: gauntlet-security-realm</p>
               </div>
             </div>
-            <span className="flex items-center gap-1.5 text-xs font-mono text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-500/20">
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
-              SSO Active
-            </span>
           </div>
 
           {/* Quick Demo Autofill Notice */}
-          <div className="flex items-center justify-between p-3 rounded-xl border border-cyan-500/20 bg-cyan-500/10 text-xs">
-            <span className="text-slate-300 font-medium">Demo credentials pre-filled</span>
+          <div className="flex items-center justify-between p-3.5 rounded-xl border border-sky-200 bg-sky-50 text-xs">
+            <span className="text-slate-700 font-semibold">Demo credentials pre-filled</span>
             <button
               type="button"
               onClick={handleFillDemo}
-              className="text-[11px] font-mono font-bold text-cyan-300 bg-cyan-950/80 hover:bg-cyan-900/80 px-2.5 py-1 rounded border border-cyan-500/40 transition-colors"
+              className="text-[11px] font-mono font-bold text-sky-700 bg-white hover:bg-sky-100 px-3 py-1 rounded-lg border border-sky-300 transition-colors shadow-xs cursor-pointer"
             >
               Fill Demo
             </button>
           </div>
 
           {/* Login Form */}
-          <form onSubmit={handleSubmit} className="space-y-5">
-            <label className="field-label text-xs">
-              <span className="block mb-1.5 font-bold text-slate-200">Username / Email</span>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <label className="block text-xs font-bold text-slate-900 uppercase tracking-wider mb-1.5">
+                Username / Email
+              </label>
               <input
                 type="text"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                className="w-full rounded-xl border-2 border-cyan-500/30 bg-[#060913] px-4 py-3 text-sm text-white placeholder:text-slate-500 font-mono focus:border-cyan-400 focus:bg-[#090e1c] focus:outline-none focus:ring-2 focus:ring-cyan-400/30 transition-all shadow-inner"
+                className="w-full rounded-xl border-2 border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 placeholder:text-slate-400 font-mono focus:border-sky-600 focus:outline-none focus:ring-2 focus:ring-sky-500/20 transition-all"
                 placeholder="admin@gauntlet.internal"
                 required
               />
-            </label>
+            </div>
 
-            <label className="field-label text-xs">
-              <span className="block mb-1.5 font-bold text-slate-200">Password</span>
+            <div>
+              <label className="block text-xs font-bold text-slate-900 uppercase tracking-wider mb-1.5">
+                Password
+              </label>
               <input
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full rounded-xl border-2 border-cyan-500/30 bg-[#060913] px-4 py-3 text-sm text-white placeholder:text-slate-500 font-mono focus:border-cyan-400 focus:bg-[#090e1c] focus:outline-none focus:ring-2 focus:ring-cyan-400/30 transition-all shadow-inner"
+                className="w-full rounded-xl border-2 border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 placeholder:text-slate-400 font-mono focus:border-sky-600 focus:outline-none focus:ring-2 focus:ring-sky-500/20 transition-all"
                 placeholder="••••••••••••"
                 required
               />
-            </label>
+            </div>
 
-            {error && <p className="text-xs text-rose-300 font-mono">{error}</p>}
+            {error && <p className="text-xs text-rose-600 font-mono font-bold">{error}</p>}
 
             <button
               type="submit"
-              className="w-full primary-button py-3.5 text-sm font-bold shadow-lg shadow-cyan-950/60 mt-2 cursor-pointer"
+              className="w-full primary-button py-3.5 text-sm font-bold shadow-md cursor-pointer mt-2"
             >
               Sign In with Keycloak SSO →
             </button>
           </form>
 
           <div className="text-center pt-2">
-            <p className="text-[11px] text-slate-400 font-mono">
+            <p className="text-[11px] text-slate-500 font-mono">
               Secured with OpenID Connect (OIDC) & SAML 2.0 Enterprise Protocols
             </p>
           </div>
@@ -146,4 +142,3 @@ export default function LoginPage() {
     </div>
   );
 }
-
