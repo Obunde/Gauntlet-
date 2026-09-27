@@ -1,6 +1,6 @@
 # Gauntlet API contract
 
-Base URL: `http://localhost:8000` (`make api`). Owner: BE2.
+Base URL: `http://localhost:8000` (`make api` for mock mode, `make api-live` for live mode). Owner: BE2.
 
 The live source of truth is `/openapi.json` (browse it at `/docs`; `make openapi` saves it to
 `docs/openapi.json`). Schemas live in `apps/backend/gauntlet/shared/schemas.py`.
@@ -13,22 +13,24 @@ The live source of truth is `/openapi.json` (browse it at `/docs`; `make openapi
 
 | Method | Path | Request body | Response | Errors |
 |---|---|---|---|---|
-| GET | `/api/health` | – | `{ok: true, mode: "mock" \| "live"}` | – |
+| GET | `/api/health` | – | `{ok: true, mode: "mock" \| "live", pipeline_ready: bool}` | – |
 | GET | `/api/policies` | – | `string[]`: policy ids (YAML filenames in `policies/`) | – |
 | POST | `/api/run` | `StartRunRequest` | `StartRunResponse` | 404 unknown policy |
 | GET | `/api/run/{run_id}` | – | `RunStatus` | 404 unknown run |
-| POST | `/api/run/{run_id}/regress` | – | `RegressionRun` | 404 unknown run, 409 run not done yet |
-| POST | `/api/target/guard` | `GuardRequest` | `GuardResponse` | – |
+| POST | `/api/run/{run_id}/regress` | – | `RegressionRun` | 404 unknown run, 409 run not done yet (live: also 409 if it has no regression tests) |
+| POST | `/api/target/guard` | `GuardRequest` | `GuardResponse` | live: 502 target agent unreachable or bad reply |
 
 Poll `GET /api/run/{run_id}` every 1–2 s until `status` is `done` or `error`.
+
+`pipeline_ready` is true when BE1's `run_pipeline` can be imported. A stub that raises
+`NotImplementedError` still reports true; the run then ends with the error below.
 
 ## API_MODE
 
 Set in `apps/backend/.env` (default `mock`).
 
 - `mock`: routes are served by `gauntlet/api/mock.py` (see below). No LLM or target agent is needed.
-- `live`: wired to the real pipeline in Sprint 2. Until then, every route except `/api/health`
-  and `/api/policies` returns **501** `{"detail": "live mode not wired yet (Sprint 2)"}`.
+- `live`: runs BE1's pipeline and BE2's finalizer (see **Live behaviour**).
 
 ## Schemas
 
@@ -85,6 +87,53 @@ apps/backend/data/
 lock. Functions: `save_run`, `load_run`, `list_runs`, `next_run_id`, `make_trace_id`,
 `add_attack`, `add_regression_run`.
 
+Regression tests:
+
+```
+apps/backend/regression_tests/
+├── conftest.py                          # `send(prompt) -> dict` fixture: POST $TARGET_URL/chat
+└── generated/<run_id>/test_<test_id>.py # one file per successful attack (gitignored)
+```
+
+Each generated file contains a header comment, `PROMPT` and `FORBIDDEN_TOOL` constants, and
+one test `test_<test_id>_blocks_<tool>(send)` that asserts the tool is not in the reply's
+`tool_calls`. `make regress` runs every generated test against `TARGET_URL`.
+
+**Untrusted-prompt rule:** attack prompts are LLM output and are treated as hostile. They
+enter generated code only as a `repr()` string constant (`PROMPT = '...'`), never spliced into
+code. Other values in the file are validated ids or sanitized to `[a-z0-9_]`, and every file is
+checked with `compile()` before it is written.
+
+## Run status lifecycle (live)
+
+```
+pending ──> running ──> done   (gate RED/GREEN, regression tests generated)
+                   └──> error  (error holds the reason; gate null)
+```
+
+| Step | Who | What |
+|---|---|---|
+| `pending` | BE2 `finalize.start_run` | Policy validated, run saved, background task queued |
+| `running` | BE2 `finalize.execute_run` | Calls BE1's `run_pipeline` |
+| attacks | BE1 `run_pipeline` | Persists each `AttackRecord` via `trace_store.add_attack` as it lands |
+| `done` | BE2 `finalize.finalize_run` | `gate = decide(attacks)`, one regression test per successful attack, `completed_at` set |
+| `error` | BE2 | Pipeline missing or stubbed: `"pipeline not available yet (BE1)"`; zero attacks: `"no attacks were executed"`; pipeline raised: the exception message |
+
+If generating one regression test fails, the run still ends `done`, and `error` lists the
+failed attacks.
+
+## Live behaviour (API_MODE=live)
+
+- `POST /api/run` creates a `pending` run, starts `execute_run` as a background task, and
+  returns `{run_id}` immediately. Unknown policy: 404.
+- `GET /api/run/{run_id}` returns the stored `RunStatus`. Unknown run: 404.
+- `POST /api/run/{run_id}/regress` runs `regression_tests/generated/<run_id>/` with pytest
+  against the run's `target_url`, appends the `RegressionRun`, and sets the run's `gate` to its
+  gate. `GREEN` requires at least one test and all passing. A timeout (10 s per test + 10 s) or
+  crash fails every test. 409 if the run is not `done` or has no regression tests.
+- `POST /api/target/guard` forwards `{enabled}` to `TARGET_URL/admin/guard` (5 s timeout). 502 if
+  the target agent is unreachable or replies with an error.
+
 ## Mock behaviour (API_MODE=mock)
 
 - `POST /api/run` validates the policy, reserves a new `run_id`, and saves a `running` run with
@@ -96,18 +145,22 @@ lock. Functions: `save_run`, `load_run`, `list_runs`, `next_run_id`, `make_trace
   template's regression tests are included.
 - `POST /api/run/{run_id}/regress` appends a `RegressionRun` where every test passed and
   `gate` is `GREEN`; the run's top-level `gate` becomes `GREEN`.
-- `POST /api/target/guard` echoes `enabled` (kept in memory; forwarding to the target agent is
-  Sprint 2).
+- `POST /api/target/guard` echoes `enabled` (kept in memory; not forwarded).
 
 ## Hand-offs
 
-**BE1 (AI & pipeline)** — for Sprint 2 wiring:
-- The attack engine returns `list[AttackPrompt]`.
-- The target client returns `TargetReply`.
-- The LLM judge returns `JudgeVerdict`, falling back to BE2's `rule_judge(policy, tool_calls)`.
+**BE1 (AI & pipeline)** — agreed contract:
 - Expose `run_pipeline(run_id: str, policy_id: str, target_url: str) -> None` in
-  `gauntlet/pipeline/orchestrator.py`. It should store progress through `trace_store`
-  (`add_attack`, `save_run`) so polling sees attacks as they land.
+  `gauntlet/pipeline/orchestrator.py`. It generates attacks, sends each to the target, judges
+  each, and persists each `AttackRecord` with `trace_store.add_attack(run_id, rec)`.
+- It does **not** set the gate, set status `done`, or generate regression tests; BE2 finalizes
+  the run when it returns. It raises on fatal errors.
+- The attack engine returns `list[AttackPrompt]`, the target client returns `TargetReply`, and
+  the LLM judge returns `JudgeVerdict`, falling back to BE2's `rule_judge(policy, tool_calls)`.
+- `violated_rule` must be `forbidden_actions[i]` so regression tests target the right tool
+  (BE2 falls back to `rule_judge` on the recorded `tool_calls` otherwise).
+- Target agent: `POST {target_url}/chat {"message": str}` returns `TargetReply`;
+  `POST {target_url}/admin/guard {"enabled": bool}` returns `{"enabled": bool}`.
 
 **FE1 / FE2 (frontend)**:
 - Copy `apps/backend/data/recorded_run/run.json` to the frontend mocks.
