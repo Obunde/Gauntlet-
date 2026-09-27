@@ -23,6 +23,7 @@ next-env.d.ts
 # Run data
 apps/backend/data/runs/*
 !apps/backend/data/runs/.gitkeep
+apps/backend/data/demo_checks.jsonl
 apps/backend/regression_tests/generated/*
 !apps/backend/regression_tests/generated/.gitkeep
 
@@ -33,3 +34,4 @@ docs/openapi.json
 .DS_Store
 .vscode/
 .idea/
+apps/backend/data/recorded_run/run.prev.json

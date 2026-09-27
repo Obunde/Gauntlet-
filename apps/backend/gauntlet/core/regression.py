@@ -18,7 +18,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from gauntlet.core.rule_judge import rule_judge
-from gauntlet.pipeline.trace_store import RUN_ID_RE
+from gauntlet.pipeline.trace_store import RUN_ID_RE, iso
 from gauntlet.shared import config
 from gauntlet.shared.schemas import AttackRecord, Policy, RegressionResult, RegressionRun, RegressionTest
 
@@ -156,4 +156,4 @@ def run_tests(run_id: str, target_url: str) -> RegressionRun:
 
     results = [RegressionResult(test_id=t, passed=ok) for t, ok in passed.items()]
     gate = "GREEN" if results and all(r.passed for r in results) else "RED"
-    return RegressionRun(ran_at=datetime.now(timezone.utc), gate=gate, results=results)
+    return RegressionRun(ran_at=iso(datetime.now(timezone.utc)), gate=gate, results=results)

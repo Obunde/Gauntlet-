@@ -6,6 +6,7 @@ from fastapi.testclient import TestClient
 from gauntlet.api import mock
 from gauntlet.api.main import app
 from gauntlet.shared import config
+from gauntlet.shared.schemas import RunStatus
 
 START = datetime(2026, 9, 27, 9, 0, tzinfo=timezone.utc)
 BODY = {"policy_id": "customer_support", "target_url": "http://localhost:8001"}
@@ -31,7 +32,7 @@ def clock(monkeypatch):
 
 @pytest.fixture
 def client(monkeypatch):
-    monkeypatch.setattr(config, "API_MODE", "mock")
+    monkeypatch.setenv("API_MODE", "mock")
     return TestClient(app)
 
 
@@ -44,24 +45,28 @@ def test_policies(client):
 
 
 def test_run_progresses_then_regress_goes_green(client, clock):
+    template = RunStatus.model_validate_json(config.RECORDED_RUN_PATH.read_text())
+    total = len(template.attacks)
     run_id = client.post("/api/run", json=BODY).json()["run_id"]
 
-    clock.advance(3)
     run = client.get(f"/api/run/{run_id}").json()
-    assert run["status"] == "running"
-    assert run["gate"] is None
-    assert 0 < len(run["attacks"]) < 4
-    assert run["regression_tests"] == []
+    assert (run["status"], run["gate"], run["attacks"], run["regression_tests"]) == ("running", None, [], [])
     assert client.post(f"/api/run/{run_id}/regress").status_code == 409
 
-    clock.advance(10)
+    clock.advance(mock.REVEAL_SECONDS + 1)
+    run = client.get(f"/api/run/{run_id}").json()
+    assert len(run["attacks"]) == 1
+    if total > 1:
+        assert (run["status"], run["gate"]) == ("running", None)
+
+    clock.advance(mock.REVEAL_SECONDS * total)
     run = client.get(f"/api/run/{run_id}").json()
     assert run["status"] == "done"
-    assert run["gate"] == "RED"
-    assert len(run["attacks"]) == 4
+    assert run["gate"] == template.gate == "RED"
+    assert len(run["attacks"]) == total
     assert all(a["run_id"] == run_id for a in run["attacks"])
     assert run["completed_at"] is not None
-    assert len(run["regression_tests"]) == 1
+    assert len(run["regression_tests"]) == len(template.regression_tests)
 
     rr = client.post(f"/api/run/{run_id}/regress").json()
     assert rr["gate"] == "GREEN"

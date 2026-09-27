@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "gauntlet"
 version = "0.1.0"
 description = "AI security release gate"
-requires-python = ">=3.11"
+requires-python = ">=3.10"
 dependencies = [
     "fastapi",
     "uvicorn[standard]",
@@ -15,7 +15,7 @@ dependencies = [
     "httpx",
     "pytest",
     "python-dotenv",
-    "openai",
+    "openai>=1.0.0",
 ]
 
 [tool.setuptools.packages.find]

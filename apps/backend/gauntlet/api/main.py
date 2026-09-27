@@ -1,24 +1,27 @@
-"""FastAPI app for the dashboard. Port 8000. Owner: BE2 & BE1."""
-from datetime import datetime, timezone
+"""FastAPI app for the dashboard. Port 8000. Owner: BE2 (BE1: /api/brev/telemetry).
 
+API_MODE=mock serves api/mock.py. API_MODE=live runs BE1's pipeline as a background task and
+finalizes the run in core/finalize.py (see docs/api-contract.md).
+"""
 import httpx
 from fastapi import BackgroundTasks, FastAPI, HTTPException
 from fastapi.concurrency import run_in_threadpool
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import ValidationError
 
 from gauntlet.api import mock
 from gauntlet.core import finalize
-from gauntlet.core.policy import list_policies
+from gauntlet.core.issues import build_issue_report
+from gauntlet.core.policy import list_policies, load_policy
 from gauntlet.core.regression import run_tests
 from gauntlet.engine import brev_client
-from gauntlet.pipeline import orchestrator, trace_store
+from gauntlet.pipeline import trace_store
 from gauntlet.shared import config
 from gauntlet.shared.schemas import (
     BrevTelemetryResponse,
     GuardRequest,
     GuardResponse,
     HealthResponse,
+    IssueReport,
     RegressionRun,
     RunStatus,
     StartRunRequest,
@@ -32,10 +35,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-
-def _now() -> str:
-    return datetime.now(timezone.utc).isoformat(timespec="seconds").replace("+00:00", "Z")
 
 
 def _mock_mode() -> bool:
@@ -66,11 +65,13 @@ def start_run(body: StartRunRequest, background: BackgroundTasks) -> StartRunRes
     if body.policy_id not in list_policies():
         raise HTTPException(404, f"Unknown policy: {body.policy_id}")
 
-    if _mock_mode():
-        return mock.start_run(body)
-
     target = body.target_url or config.target_url()
-    run_id = finalize.start_run(body.policy_id, target)
+    try:
+        if _mock_mode():
+            return mock.start_run(body.model_copy(update={"target_url": target}))
+        run_id = finalize.start_run(body.policy_id, target)
+    except FileNotFoundError as exc:
+        raise HTTPException(404, str(exc)) from exc
     background.add_task(finalize.execute_run, run_id, body.policy_id, target)
     return StartRunResponse(run_id=run_id)
 
@@ -81,6 +82,19 @@ def get_run(run_id: str) -> RunStatus:
     if run is None:
         raise HTTPException(404, f"Unknown run: {run_id}")
     return run
+
+
+@app.get("/api/run/{run_id}/issues", response_model=IssueReport)
+def get_issues(run_id: str) -> IssueReport:
+    """Successful attacks grouped by (violated tool, attack type), highest score first."""
+    run = get_run(run_id)  # 404 if unknown; advances mock runs like a poll would
+    if run.status != "done":
+        raise HTTPException(409, f"Run {run_id} is {run.status}, not done")
+    try:
+        policy = load_policy(run.policy_id)
+    except FileNotFoundError as exc:
+        raise HTTPException(404, str(exc)) from exc
+    return build_issue_report(run, policy)
 
 
 @app.post("/api/run/{run_id}/regress", response_model=RegressionRun)

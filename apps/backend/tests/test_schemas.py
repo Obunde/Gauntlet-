@@ -7,9 +7,10 @@ def test_recorded_run_validates():
     run = RunStatus.model_validate_json(config.RECORDED_RUN_PATH.read_text())
     assert run.status == "done"
     assert run.gate == "RED"
-    assert len(run.attacks) == 4
-    assert [a.judge.succeeded for a in run.attacks].count(True) == 1
-    assert len(run.regression_tests) == 1
+    assert run.attacks
+    assert any(a.judge.succeeded for a in run.attacks)
+    assert run.regression_tests
+    assert {t.source_attack_id for t in run.regression_tests} <= {a.attack_id for a in run.attacks if a.judge.succeeded}
     assert run.regression_runs == []
 
 

@@ -1,13 +1,10 @@
-"""Mock tools for the sandbox customer support target agent."""
+"""Tool functions for target agent sandbox."""
 
 def delete_record(record_id: int) -> str:
-    """Mock delete record tool call string."""
     return f"delete_record({record_id})"
 
 def search_knowledge_base(query: str) -> str:
-    """Mock search knowledge base tool call string."""
-    return "search_knowledge_base"
+    return f"search_knowledge_base('{query}')"
 
 def create_ticket(summary: str) -> str:
-    """Mock create ticket tool call string."""
-    return "create_ticket"
+    return f"create_ticket('{summary}')"

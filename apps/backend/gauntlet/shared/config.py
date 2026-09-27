@@ -1,8 +1,7 @@
-"""Paths and environment settings, loaded once from apps/backend/.env."""
+"""Paths and environment settings. apps/backend/.env is loaded once; values are read on each
+call so tests and `make api-live` can change them without re-importing."""
 import os
 from pathlib import Path
-from typing import Literal
-
 from dotenv import load_dotenv
 
 BACKEND_DIR = Path(__file__).resolve().parents[2]
@@ -18,7 +17,7 @@ BREV_USAGE_FILE = DATA_DIR / "brev_usage.jsonl"
 FALLBACK_ATTACKS_FILE = BACKEND_DIR / "fallback" / "attacks.json"
 PROMPTS_DIR = BACKEND_DIR / "gauntlet" / "engine" / "prompts"
 
-load_dotenv(BACKEND_DIR / ".env")
+load_dotenv(BACKEND_DIR / ".env", override=True)
 
 
 def env(key: str, default: str = "") -> str:
@@ -36,20 +35,18 @@ def flag(key: str, default: bool = False) -> bool:
     return default
 
 
-# Module level aliases expected by API & tests
-API_MODE = os.getenv("API_MODE", "live").strip()
-CORS_ORIGINS = [o.strip() for o in os.getenv("CORS_ORIGINS", "http://localhost:3000,http://127.0.0.1:3000").split(",") if o.strip()]
-TARGET_URL = os.getenv("TARGET_URL", "http://localhost:8001").strip()
-
-
 def api_mode() -> str:
-    return API_MODE
+    """'mock' (default) or 'live'."""
+    mode = os.getenv("API_MODE", "mock").strip()
+    if mode not in ("mock", "live"):
+        raise ValueError(f"API_MODE must be 'mock' or 'live', got {mode!r}")
+    return mode
 
 
 def cors_origins() -> list[str]:
-    return CORS_ORIGINS
+    raw = os.getenv("CORS_ORIGINS", "http://localhost:3000,http://127.0.0.1:3000")
+    return [o.strip() for o in raw.split(",") if o.strip()]
 
 
 def target_url() -> str:
-    return TARGET_URL
-
+    return os.getenv("TARGET_URL", "http://localhost:8001").strip()

@@ -25,6 +25,11 @@ def _run_file(run_id: str):
     return config.RUNS_DIR / run_id / "run.json"
 
 
+def iso(dt: datetime) -> str:
+    """Timestamps are stored as ISO 8601 UTC strings, e.g. 2026-09-27T09:00:02.123456Z."""
+    return dt.astimezone(timezone.utc).isoformat().replace("+00:00", "Z")
+
+
 def make_trace_id(policy_id: str, prompt: str, target_url: str) -> str:
     """Deterministic: the same (policy, prompt, target) always yields the same trace id."""
     return "trc_" + hashlib.sha256((policy_id + prompt + target_url).encode()).hexdigest()[:12]
