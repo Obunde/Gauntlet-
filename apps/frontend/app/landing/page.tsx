@@ -34,9 +34,10 @@ export default function LandingPage() {
 
   const handleLaunchConsole = () => {
     if (!isAuthenticated) {
-      login("admin@gauntlet.internal", "Security Engineer (Admin)");
+      router.push("/login");
+    } else {
+      router.push("/dashboard");
     }
-    router.push("/dashboard");
   };
 
   return (
@@ -98,7 +99,7 @@ export default function LandingPage() {
           </button>
           {!isAuthenticated && (
             <button
-              onClick={() => setShowKeycloakModal(true)}
+              onClick={() => router.push("/login")}
               className="secondary-button text-base px-7 py-3.5 font-bold border-slate-300 hover:border-sky-500 cursor-pointer"
             >
               🔐 Keycloak Enterprise Login
