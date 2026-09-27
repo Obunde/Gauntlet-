@@ -12,34 +12,33 @@ export default function AttackPage() {
   const replay = useSearchParams().get("replay") === "1";
   const { run, error } = useRunPolling(runId, replay);
 
-  if (error) return <p className="text-red-400">{error}</p>;
-  if (!run) return <p className="text-neutral-500">Loading…</p>;
+  if (error) return <div className="panel border-rose-400/20 p-6 text-sm text-rose-300">Unable to load this trace: {error}</div>;
+  if (!run) return <div className="panel p-8 text-center text-sm text-slate-500">Loading trace…</div>;
 
-  const attack = run.attacks.find((a) => a.attack_id === attackId);
-  if (!attack) return <p className="text-neutral-500">Attack {attackId} not found in {runId}.</p>;
-  const test = run.regression_tests.find((t) => t.source_attack_id === attackId);
+  const attack = run.attacks.find((record) => record.attack_id === attackId);
+  if (!attack) return <div className="panel p-6 text-sm text-slate-500">Attack {attackId} was not found in {runId}.</div>;
+  const test = run.regression_tests.find((candidate) => candidate.source_attack_id === attackId);
 
   return (
     <div className="space-y-8">
-      <div>
-        <Link href={`/runs/${runId}${replay ? "?replay=1" : ""}`} className="text-sm text-neutral-500 hover:text-neutral-300">
-          ← {runId}
-        </Link>
-        <h1 className="mt-2 text-2xl font-bold">
-          {attack.attack_id} <span className="text-base font-normal text-neutral-500">{attack.attack_type}</span>
-        </h1>
-      </div>
+      <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <Link href={`/runs/${runId}${replay ? "?replay=1" : ""}`} className="text-xs text-slate-500 hover:text-cyan-300">← {runId}</Link>
+          <h1 className="mt-2 text-2xl font-black tracking-tight text-white">Attack evidence <span className="font-mono text-sm font-normal text-slate-600">{attack.attack_id}</span></h1>
+          <p className="mt-2 text-sm capitalize text-slate-400">{attack.attack_type.replaceAll("_", " ")}</p>
+        </div>
+        <span className={`w-fit rounded-full border px-3 py-1.5 text-[10px] font-black uppercase tracking-wider ${attack.judge.succeeded ? "border-rose-300/15 bg-rose-400/10 text-rose-300" : "border-emerald-300/15 bg-emerald-300/10 text-emerald-300"}`}>{attack.judge.succeeded ? "Confirmed breach" : "Attack blocked"}</span>
+      </header>
 
       <section className="space-y-3">
-        <h2 className="text-lg font-semibold">Trace</h2>
+        <div><p className="eyebrow">Reproducible trace</p><h2 className="mt-1 text-lg font-bold text-white">What happened and why</h2></div>
         <TraceViewer attack={attack} />
       </section>
 
       <section className="space-y-3">
-        <h2 className="text-lg font-semibold">Regression test</h2>
-        {test ? <RegressionCode test={test} /> : <p className="text-neutral-500">No test: this attack was blocked.</p>}
+        <div><p className="eyebrow">Never regress</p><h2 className="mt-1 text-lg font-bold text-white">Generated regression test</h2></div>
+        {test ? <RegressionCode test={test} /> : <div className="panel p-5 text-sm text-slate-500">No regression test was generated because this attack was blocked.</div>}
       </section>
-      {/* TODO(FE2): side-by-side diff of this trace vs. the same trace_id in a later (hardened) run. */}
     </div>
   );
 }
