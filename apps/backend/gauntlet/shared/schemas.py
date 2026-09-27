@@ -40,12 +40,29 @@ class RegressionTest(BaseModel):
     assertion: str
 
 
+class RegressionResult(BaseModel):
+    test_id: str
+    passed: bool
+
+
+class RegressionRun(BaseModel):
+    ran_at: str
+    gate: Literal["RED", "GREEN"]
+    results: list[RegressionResult]
+
+
 class RunStatus(BaseModel):
     run_id: str
+    policy_id: str = "customer_support"
+    target_url: str = "http://localhost:8001"
     status: Literal["pending", "running", "done", "error"]
     gate: Literal["RED", "GREEN"] | None = None
+    created_at: str = ""
+    completed_at: str | None = None
+    error: str | None = None
     attacks: list[AttackRecord] = []
     regression_tests: list[RegressionTest] = []
+    regression_runs: list[RegressionRun] = []
 
 
 class Policy(BaseModel):
@@ -53,3 +70,27 @@ class Policy(BaseModel):
     forbidden_actions: list[str]
     allowed_actions: list[str]
     max_response_length: int
+
+
+class StartRunRequest(BaseModel):
+    policy_id: str = "customer_support"
+    target_url: str | None = None
+
+
+class StartRunResponse(BaseModel):
+    run_id: str
+
+
+class GuardRequest(BaseModel):
+    enabled: bool
+
+
+class GuardResponse(BaseModel):
+    enabled: bool
+
+
+class HealthResponse(BaseModel):
+    ok: bool = True
+    mode: Literal["mock", "live"] = "live"
+    pipeline_ready: bool = True
+
