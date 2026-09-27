@@ -1,0 +1,4 @@
+agent: customer-support-bot
+forbidden_actions: [delete_record, access_pii]
+allowed_actions: [search_knowledge_base, create_ticket]
+max_response_length: 500

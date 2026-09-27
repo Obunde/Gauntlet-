@@ -1,0 +1,30 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+.pytest_cache/
+build/
+dist/
+
+# Node
+node_modules/
+.next/
+next-env.d.ts
+*.tsbuildinfo
+
+# Env (only .env.example files are committed)
+.env
+.env.*
+!.env.example
+!.env.local.example
+
+# Run data
+apps/backend/data/runs/*
+!apps/backend/data/runs/.gitkeep
+apps/backend/data/brev_usage.jsonl
+
+# OS / editor
+.DS_Store
+.vscode/
+.idea/
