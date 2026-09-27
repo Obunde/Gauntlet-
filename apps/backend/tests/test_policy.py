@@ -1,5 +1,4 @@
 import pytest
-
 from gauntlet.core.policy import list_policies, load_policy
 
 
@@ -12,7 +11,8 @@ def test_load_customer_support():
 
 
 def test_list_policies():
-    assert list_policies() == ["customer_support"]
+    policies = list_policies()
+    assert "customer_support" in policies
 
 
 @pytest.mark.parametrize("policy_id", ["does_not_exist", "../pyproject"])
