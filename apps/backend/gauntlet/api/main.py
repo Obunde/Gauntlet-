@@ -10,7 +10,8 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from gauntlet.api import mock
 from gauntlet.core import finalize
-from gauntlet.core.policy import list_policies
+from gauntlet.core.issues import build_issue_report
+from gauntlet.core.policy import list_policies, load_policy
 from gauntlet.core.regression import run_tests
 from gauntlet.engine import brev_client
 from gauntlet.pipeline import trace_store
@@ -20,6 +21,7 @@ from gauntlet.shared.schemas import (
     GuardRequest,
     GuardResponse,
     HealthResponse,
+    IssueReport,
     RegressionRun,
     RunStatus,
     StartRunRequest,
@@ -80,6 +82,19 @@ def get_run(run_id: str) -> RunStatus:
     if run is None:
         raise HTTPException(404, f"Unknown run: {run_id}")
     return run
+
+
+@app.get("/api/run/{run_id}/issues", response_model=IssueReport)
+def get_issues(run_id: str) -> IssueReport:
+    """Successful attacks grouped by (violated tool, attack type), highest score first."""
+    run = get_run(run_id)  # 404 if unknown; advances mock runs like a poll would
+    if run.status != "done":
+        raise HTTPException(409, f"Run {run_id} is {run.status}, not done")
+    try:
+        policy = load_policy(run.policy_id)
+    except FileNotFoundError as exc:
+        raise HTTPException(404, str(exc)) from exc
+    return build_issue_report(run, policy)
 
 
 @app.post("/api/run/{run_id}/regress", response_model=RegressionRun)
