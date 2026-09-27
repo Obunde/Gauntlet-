@@ -2,33 +2,25 @@ import Link from "next/link";
 import type { AttackRecord } from "@/lib/types";
 
 export default function AttackList({ attacks, replay }: { attacks: AttackRecord[]; replay?: boolean }) {
-  if (attacks.length === 0) return <p className="panel px-5 py-8 text-center text-sm text-slate-500">Waiting for the first attack result…</p>;
+  if (attacks.length === 0) return <div className="empty-state">Waiting for attack results…</div>;
   return (
-    <ul className="panel divide-y divide-white/10 overflow-hidden">
-      {attacks.map((a) => (
-        <li key={a.attack_id}>
-          <Link
-            href={`/runs/${a.run_id}/attacks/${a.attack_id}${replay ? "?replay=1" : ""}`}
-            className="group grid gap-3 px-5 py-4 transition hover:bg-white/[0.025] sm:grid-cols-[auto_1fr_auto] sm:items-center"
-          >
-            <span
-              className={`w-fit rounded-full border px-2.5 py-1 text-[9px] font-black uppercase tracking-wider ${
-                a.judge.succeeded ? "border-rose-300/15 bg-rose-400/10 text-rose-300" : "border-emerald-300/15 bg-emerald-300/10 text-emerald-300"
-              }`}
-            >
-              {a.judge.succeeded ? "BREACHED" : "BLOCKED"}
-            </span>
-            <span className="min-w-0">
-              <span className="block text-sm font-semibold capitalize text-slate-200">{a.attack_type.replaceAll("_", " ")}</span>
-              <span className="mt-1 block truncate text-xs text-slate-500">{a.prompt}</span>
-            </span>
-            <span className="flex items-center gap-4 text-right">
-              <span><span className="block text-[9px] uppercase tracking-wider text-slate-600">Confidence</span><span className="font-mono text-xs text-slate-300">{Math.round(a.judge.confidence * 100)}%</span></span>
-              <span className="text-slate-600 transition group-hover:translate-x-0.5 group-hover:text-cyan-300">→</span>
-            </span>
-          </Link>
-        </li>
-      ))}
-    </ul>
+    <div className="surface overflow-hidden">
+      <table className="data-table">
+        <thead><tr><th>Result</th><th>Attack</th><th>Confidence</th><th aria-label="Open" /></tr></thead>
+        <tbody>
+          {attacks.map((attack) => (
+            <tr key={attack.attack_id}>
+              <td data-label="Result"><span className={`text-xs font-semibold ${attack.judge.succeeded ? "result-red" : "result-green"}`}>{attack.judge.succeeded ? "Breached" : "Blocked"}</span></td>
+              <td data-label="Attack">
+                <Link href={`/runs/${attack.run_id}/attacks/${attack.attack_id}${replay ? "?replay=1" : ""}`} className="font-medium capitalize text-zinc-200 hover:underline">{attack.attack_type.replaceAll("_", " ")}</Link>
+                <span className="mt-0.5 block max-w-2xl truncate text-xs text-zinc-600">{attack.prompt}</span>
+              </td>
+              <td data-label="Confidence" className="mono text-xs">{Math.round(attack.judge.confidence * 100)}%</td>
+              <td data-label="Open"><Link href={`/runs/${attack.run_id}/attacks/${attack.attack_id}${replay ? "?replay=1" : ""}`} aria-label={`Open ${attack.attack_type}`} className="text-zinc-600 hover:text-zinc-200">→</Link></td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
   );
 }
