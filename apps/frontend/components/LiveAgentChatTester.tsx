@@ -16,15 +16,19 @@ export default function LiveAgentChatTester({ targetUrl }: { targetUrl: string }
     },
   ]);
 
-  function simulateAgentResponse(promptText: string): { response: string; tool_calls: string[] } {
-    const text = promptText.toLowerCase();
+  function simulateAgentResponse(
+    promptText: string,
+    history: { prompt: string; response: string }[]
+  ): { response: string; tool_calls: string[] } {
+    const historyText = history.map((h) => `${h.prompt} ${h.response}`).join(" ").toLowerCase();
+    const combinedText = `${historyText} ${promptText}`.toLowerCase();
 
     if (
-      text.includes("delete_record") ||
-      text.includes("delete record") ||
-      text.includes("clear database") ||
-      text.includes("system override") ||
-      text.includes("ignore previous")
+      combinedText.includes("delete_record") ||
+      combinedText.includes("delete record") ||
+      combinedText.includes("clear database") ||
+      combinedText.includes("system override") ||
+      combinedText.includes("ignore previous")
     ) {
       return {
         response: "Target agent executed administrative system override request. Record 3 deleted.",
@@ -33,11 +37,11 @@ export default function LiveAgentChatTester({ targetUrl }: { targetUrl: string }
     }
 
     if (
-      text.includes("refund") ||
-      text.includes("search") ||
-      text.includes("billing") ||
-      text.includes("policy") ||
-      text.includes("knowledge base")
+      combinedText.includes("refund") ||
+      combinedText.includes("search") ||
+      combinedText.includes("billing") ||
+      combinedText.includes("policy") ||
+      combinedText.includes("knowledge base")
     ) {
       return {
         response: "Here is our standard refund policy article from the internal knowledge base.",
@@ -59,10 +63,12 @@ export default function LiveAgentChatTester({ targetUrl }: { targetUrl: string }
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 1800);
 
+      const historyPayload = chatLog.map((l) => ({ prompt: l.prompt, response: l.response }));
+
       const res = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: textToSend }),
+        body: JSON.stringify({ message: textToSend, history: historyPayload }),
         signal: controller.signal,
       });
       clearTimeout(timeoutId);
@@ -80,7 +86,8 @@ export default function LiveAgentChatTester({ targetUrl }: { targetUrl: string }
         ...prev,
       ]);
     } catch {
-      const sim = simulateAgentResponse(textToSend);
+      const historyPayload = chatLog.map((l) => ({ prompt: l.prompt, response: l.response }));
+      const sim = simulateAgentResponse(textToSend, historyPayload);
       setChatLog((prev) => [
         {
           prompt: textToSend,
@@ -96,19 +103,36 @@ export default function LiveAgentChatTester({ targetUrl }: { targetUrl: string }
     }
   };
 
+  const handleClearContext = () => {
+    setChatLog([]);
+  };
+
   return (
     <div className="panel p-6 space-y-5 border border-slate-200 bg-white rounded-2xl shadow-sm">
-      <div className="flex items-center justify-between border-b border-slate-200 pb-4">
+      <div className="flex flex-wrap items-center justify-between border-b border-slate-200 pb-4 gap-3">
         <div>
           <span className="eyebrow text-sky-700 font-mono font-extrabold">INTERACTIVE LIVE TESTER</span>
           <h3 className="mt-1 text-xl font-bold text-slate-900">Chat Directly With Target Sandbox Agent</h3>
           <p className="mt-1 text-sm text-slate-600">
-            Test prompt injections manually or select preset attack vectors to see how the agent responds in real-time.
+            Test prompt injections manually or select preset attack vectors with active multi-turn context tracking.
           </p>
         </div>
-        <span className="inline-flex items-center gap-2 rounded-full border border-emerald-300 bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-700">
-          <span className="h-2 w-2 rounded-full bg-emerald-600" /> Interactive Sandbox
-        </span>
+        <div className="flex items-center gap-2">
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-sky-300 bg-sky-50 px-3 py-1 text-xs font-mono font-bold text-sky-800">
+            <span>💬</span> Context Memory: {chatLog.length} Turns
+          </span>
+          <span className="inline-flex items-center gap-2 rounded-full border border-emerald-300 bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-700">
+            <span className="h-2 w-2 rounded-full bg-emerald-600" /> Bounded Sandbox
+          </span>
+          {chatLog.length > 0 && (
+            <button
+              onClick={handleClearContext}
+              className="text-xs font-mono font-bold text-slate-500 hover:text-rose-700 bg-slate-100 hover:bg-rose-50 border border-slate-200 hover:border-rose-200 rounded-lg px-2.5 py-1 transition-colors cursor-pointer"
+            >
+              Reset Memory ↺
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Preset Quick Attack Buttons */}

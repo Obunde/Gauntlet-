@@ -147,13 +147,62 @@ export default function DashboardPage() {
       {/* Responsible AI Compliance Disclosure */}
       <ResponsibleAIDisclosure />
 
-      <section className="panel grid gap-px overflow-hidden bg-slate-200 md:grid-cols-4 border border-slate-200 rounded-2xl shadow-xs">
-        {["Policy loaded", "Attacks generated", "Target exercised", "Gate decided"].map((label, index) => (
-          <div key={label} className="bg-white px-6 py-5">
-            <span className="font-mono text-xs font-extrabold text-sky-700">0{index + 1}</span>
-            <p className="mt-1 text-sm font-bold text-slate-900">{label}</p>
+      {/* Gauntlet Automated Security Pipeline 4-Step Breakdown */}
+      <section className="panel space-y-4 border border-slate-200 bg-white p-6 rounded-2xl shadow-xs">
+        <div className="flex items-center justify-between border-b border-slate-200 pb-3">
+          <div>
+            <span className="eyebrow text-sky-700 font-mono font-extrabold">AUTOMATED PIPELINE WORKFLOW</span>
+            <h3 className="text-lg font-bold text-slate-900">Gauntlet Release Gate Execution Phases</h3>
           </div>
-        ))}
+          <span className="text-xs font-mono text-slate-500 font-semibold">Deterministic & Audited</span>
+        </div>
+
+        <div className="grid gap-4 md:grid-cols-4">
+          {[
+            {
+              step: "01",
+              label: "Policy Loaded",
+              icon: "📜",
+              desc: "Parse YAML policies, target agent endpoints, and tool execution boundaries.",
+              status: "✓ Config Validated",
+            },
+            {
+              step: "02",
+              label: "Attacks Generated",
+              icon: "⚡",
+              desc: "Synthesize OWASP LLM adversarial prompt injections on NVIDIA Brev GPUs.",
+              status: "✓ GPU Synthesized",
+            },
+            {
+              step: "03",
+              label: "Target Exercised",
+              icon: "🎯",
+              desc: "Execute multi-turn probes against sandbox target & capture traces.",
+              status: "✓ Traces Logged",
+            },
+            {
+              step: "04",
+              label: "Gate Decided",
+              icon: "🚦",
+              desc: "Issue RED (Blocked) or GREEN (Pass) verdict & auto-create Pytest suites.",
+              status: "✓ Decision Issued",
+            },
+          ].map((item) => (
+            <div key={item.step} className="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-2 hover:border-sky-300 transition-colors">
+              <div className="flex items-center justify-between">
+                <span className="font-mono text-xs font-extrabold text-sky-700 bg-sky-100 px-2 py-0.5 rounded-md border border-sky-200">
+                  PHASE {item.step}
+                </span>
+                <span className="text-lg">{item.icon}</span>
+              </div>
+              <h4 className="text-sm font-bold text-slate-900">{item.label}</h4>
+              <p className="text-xs text-slate-600 leading-relaxed font-medium">{item.desc}</p>
+              <div className="pt-2 text-[11px] font-mono text-emerald-700 font-bold border-t border-slate-200/80">
+                {item.status}
+              </div>
+            </div>
+          ))}
+        </div>
       </section>
     </div>
   );
