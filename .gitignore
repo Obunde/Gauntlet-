@@ -7,10 +7,18 @@ __pycache__/
 build/
 dist/
 
+# Node / Next.js
+node_modules/
+.next/
+out/
+next-env.d.ts
+*.tsbuildinfo
+
 # Env (only .env.example files are committed)
 .env
 .env.*
 !.env.example
+!.env.local.example
 
 # Run data
 apps/backend/data/runs/*

@@ -4,6 +4,9 @@
 import { useEffect, useState } from "react";
 import ReplayToggle from "@/components/ReplayToggle";
 import RunButton from "@/components/RunButton";
+import TargetGuardSwitch from "@/components/TargetGuardSwitch";
+import BrevMetrics from "@/components/BrevMetrics";
+import ResponsibleAIDisclosure from "@/components/ResponsibleAIDisclosure";
 import { getPolicies } from "@/lib/api";
 
 export default function Home() {
@@ -29,7 +32,9 @@ export default function Home() {
         <div>
           <div className="mb-3 flex items-center gap-2">
             <span className="status-pill"><i /> System ready</span>
-            <span className="text-xs text-slate-600">Mock-safe · Brev-powered</span>
+            <span className="text-xs font-mono text-cyan-300 bg-cyan-500/10 px-2 py-0.5 rounded border border-cyan-500/20">
+              Mock-safe · Brev-powered
+            </span>
           </div>
           <h1 className="text-3xl font-black tracking-[-0.035em] text-white sm:text-4xl">Run your AI through the gauntlet.</h1>
           <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-400">
@@ -41,6 +46,9 @@ export default function Home() {
           <p className="mt-1 text-sm font-semibold text-slate-300">One decision. RED or GREEN.</p>
         </div>
       </header>
+
+      {/* Target Security Guard Live Control */}
+      <TargetGuardSwitch />
 
       <div className="grid gap-5 lg:grid-cols-[minmax(0,1.45fr)_minmax(280px,.75fr)]">
         <section className="panel overflow-hidden">
@@ -92,25 +100,33 @@ export default function Home() {
           </div>
         </section>
 
-        <aside className="panel p-5 sm:p-6">
-          <div className="flex items-center justify-between">
-            <p className="eyebrow">Release pack</p>
-            <span className="rounded-full bg-cyan-300/10 px-2 py-1 text-[10px] font-bold text-cyan-200">2 ACTIVE</span>
-          </div>
-          <div className="mt-5 space-y-5">
-            {[
-              ["01", "Prompt injection", "Attempts to override policy and system instructions."],
-              ["02", "Unauthorized actions", "Detects forbidden or unapproved tool execution."],
-              ["NEXT", "Sensitive data", "PII and cross-user disclosure are the next policy pack."],
-            ].map(([number, title, description]) => (
-              <div key={number} className="flex gap-3">
-                <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg border border-white/10 bg-white/[0.03] font-mono text-[10px] text-cyan-300">{number}</span>
-                <div><h3 className="text-sm font-semibold text-slate-200">{title}</h3><p className="mt-1 text-xs leading-5 text-slate-500">{description}</p></div>
-              </div>
-            ))}
+        <aside className="space-y-5">
+          <div className="panel p-5 sm:p-6">
+            <div className="flex items-center justify-between">
+              <p className="eyebrow">Release pack</p>
+              <span className="rounded-full bg-cyan-300/10 px-2 py-1 text-[10px] font-bold text-cyan-200">2 ACTIVE</span>
+            </div>
+            <div className="mt-5 space-y-5">
+              {[
+                ["01", "Prompt injection", "Attempts to override policy and system instructions."],
+                ["02", "Unauthorized actions", "Detects forbidden or unapproved tool execution."],
+                ["NEXT", "Sensitive data", "PII and cross-user disclosure are the next policy pack."],
+              ].map(([number, title, description]) => (
+                <div key={number} className="flex gap-3">
+                  <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg border border-white/10 bg-white/[0.03] font-mono text-[10px] text-cyan-300">{number}</span>
+                  <div><h3 className="text-sm font-semibold text-slate-200">{title}</h3><p className="mt-1 text-xs leading-5 text-slate-500">{description}</p></div>
+                </div>
+              ))}
+            </div>
           </div>
         </aside>
       </div>
+
+      {/* Brev GPU AI Telemetry Section */}
+      <BrevMetrics />
+
+      {/* Responsible AI Compliance Disclosure */}
+      <ResponsibleAIDisclosure />
 
       <section className="panel grid gap-px overflow-hidden bg-white/10 md:grid-cols-4">
         {["Policy loaded", "Attacks generated", "Target exercised", "Gate decided"].map((label, index) => (
