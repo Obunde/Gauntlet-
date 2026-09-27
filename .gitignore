@@ -34,3 +34,4 @@ docs/openapi.json
 .DS_Store
 .vscode/
 .idea/
+apps/backend/data/recorded_run/run.prev.json
