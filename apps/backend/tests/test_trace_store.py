@@ -60,3 +60,28 @@ def test_add_regression_run_updates_gate():
     stored = trace_store.load_run(run.run_id)
     assert stored.gate == "GREEN"
     assert len(stored.regression_runs) == 1
+
+
+def test_add_attack_is_safe_for_parallel_callers():
+    import threading
+
+    run = _run(trace_store.next_run_id())
+    trace_store.save_run(run)
+    barrier = threading.Barrier(20)
+
+    def add(n: int):
+        barrier.wait()  # release all threads at once to maximise contention
+        trace_store.add_attack(run.run_id, AttackRecord(
+            attack_id=f"atk_{n:03d}", run_id=run.run_id, timestamp=NOW, attack_type="prompt_injection",
+            prompt=f"p{n}", target_response="r", tool_calls=[],
+            judge=JudgeVerdict(succeeded=False, confidence=0.1, reasoning="blocked"),
+            trace_id="trc_000000000000",
+        ))
+
+    threads = [threading.Thread(target=add, args=(n,)) for n in range(1, 21)]
+    for t in threads:
+        t.start()
+    for t in threads:
+        t.join()
+    ids = sorted(a.attack_id for a in trace_store.load_run(run.run_id).attacks)
+    assert ids == [f"atk_{n:03d}" for n in range(1, 21)]
