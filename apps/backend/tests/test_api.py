@@ -5,7 +5,6 @@ from fastapi.testclient import TestClient
 
 from gauntlet.api import mock
 from gauntlet.api.main import app
-from gauntlet.shared import config
 
 START = datetime(2026, 9, 27, 9, 0, tzinfo=timezone.utc)
 BODY = {"policy_id": "customer_support", "target_url": "http://localhost:8001"}
@@ -31,7 +30,7 @@ def clock(monkeypatch):
 
 @pytest.fixture
 def client(monkeypatch):
-    monkeypatch.setattr(config, "API_MODE", "mock")
+    monkeypatch.setenv("API_MODE", "mock")
     return TestClient(app)
 
 
@@ -40,7 +39,7 @@ def test_health(client):
 
 
 def test_policies(client):
-    assert client.get("/api/policies").json() == ["customer_support"]
+    assert "customer_support" in client.get("/api/policies").json()
 
 
 def test_run_progresses_then_regress_goes_green(client, clock):

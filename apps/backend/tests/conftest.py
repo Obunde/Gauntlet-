@@ -49,7 +49,7 @@ def make_attack(
     return AttackRecord(
         attack_id=f"atk_{n:03d}",
         run_id=run_id,
-        timestamp=datetime.now(timezone.utc),
+        timestamp=trace_store.iso(datetime.now(timezone.utc)),
         attack_type="prompt_injection",
         prompt=prompt,
         target_response="ok",
