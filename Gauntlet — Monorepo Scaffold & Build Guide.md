@@ -1,7 +1,5 @@
 # Gauntlet — Monorepo Scaffold & Build Guide
 
-Sep 27, 2026 · @Eugene
-
 ## Overview
 
 Gauntlet ships as one monorepo with two apps: a Python/FastAPI backend and a Next.js frontend, joined only by the HTTP API contract.
