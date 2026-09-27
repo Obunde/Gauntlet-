@@ -15,6 +15,7 @@ dependencies = [
     "httpx",
     "pytest",
     "python-dotenv",
+    "openai>=1.0.0",
 ]
 
 [tool.setuptools.packages.find]
