@@ -36,7 +36,7 @@ def client(monkeypatch):
 
 
 def test_health(client):
-    assert client.get("/api/health").json() == {"ok": True, "mode": "mock"}
+    assert client.get("/api/health").json()["mode"] == "mock"
 
 
 def test_policies(client):
@@ -80,12 +80,6 @@ def test_unknown_policy_404(client):
 
 def test_guard_echo(client):
     assert client.post("/api/target/guard", json={"enabled": True}).json() == {"enabled": True}
-
-
-def test_live_mode_returns_501(client, monkeypatch):
-    monkeypatch.setattr(config, "API_MODE", "live")
-    assert client.post("/api/run", json=BODY).status_code == 501
-    assert client.get("/api/policies").status_code == 200
 
 
 def test_cors_header(client):

@@ -10,6 +10,8 @@ POLICIES_DIR = BACKEND_DIR / "policies"
 DATA_DIR = BACKEND_DIR / "data"
 RUNS_DIR = DATA_DIR / "runs"
 RECORDED_RUN_PATH = DATA_DIR / "recorded_run" / "run.json"
+REGRESSION_DIR = BACKEND_DIR / "regression_tests"
+GENERATED_TESTS_DIR = REGRESSION_DIR / "generated"
 
 load_dotenv(BACKEND_DIR / ".env")
 
