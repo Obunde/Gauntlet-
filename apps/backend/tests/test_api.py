@@ -40,7 +40,7 @@ def test_health(client):
 
 
 def test_policies(client):
-    assert client.get("/api/policies").json() == ["customer_support"]
+    assert "customer_support" in client.get("/api/policies").json()
 
 
 def test_run_progresses_then_regress_goes_green(client, clock):

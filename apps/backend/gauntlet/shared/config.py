@@ -36,20 +36,20 @@ def flag(key: str, default: bool = False) -> bool:
     return default
 
 
+# Module level aliases expected by API & tests
+API_MODE = os.getenv("API_MODE", "live").strip()
+CORS_ORIGINS = [o.strip() for o in os.getenv("CORS_ORIGINS", "http://localhost:3000,http://127.0.0.1:3000").split(",") if o.strip()]
+TARGET_URL = os.getenv("TARGET_URL", "http://localhost:8001").strip()
+
+
 def api_mode() -> str:
-    return os.getenv("API_MODE", "live").strip()
+    return API_MODE
 
 
 def cors_origins() -> list[str]:
-    raw = os.getenv("CORS_ORIGINS", "http://localhost:3000,http://127.0.0.1:3000")
-    return [o.strip() for o in raw.split(",") if o.strip()]
+    return CORS_ORIGINS
 
 
 def target_url() -> str:
-    return os.getenv("TARGET_URL", "http://localhost:8001")
+    return TARGET_URL
 
-
-# Module level aliases expected by API & tests
-API_MODE = os.getenv("API_MODE", "live").strip()
-CORS_ORIGINS = cors_origins()
-TARGET_URL = os.getenv("TARGET_URL", "http://localhost:8001")

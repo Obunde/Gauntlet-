@@ -56,12 +56,13 @@ def get_run(run_id: str) -> RunStatus | None:
 
     template = _template()
     total = len(template.attacks)
-    shown = min(total, int((now() - run.created_at).total_seconds() // REVEAL_SECONDS))
+    created_at_dt = datetime.fromisoformat(run.created_at) if isinstance(run.created_at, str) else run.created_at
+    shown = min(total, int((now() - created_at_dt).total_seconds() // REVEAL_SECONDS))
     run.attacks = [
         a.model_copy(
             update={
                 "run_id": run_id,
-                "timestamp": run.created_at + timedelta(seconds=REVEAL_SECONDS * (i + 1)),
+                "timestamp": (created_at_dt + timedelta(seconds=REVEAL_SECONDS * (i + 1))).isoformat(),
                 "trace_id": trace_store.make_trace_id(run.policy_id, a.prompt, run.target_url),
             }
         )
@@ -70,7 +71,7 @@ def get_run(run_id: str) -> RunStatus | None:
     if shown == total:
         run.status = "done"
         run.gate = template.gate
-        run.completed_at = run.created_at + timedelta(seconds=REVEAL_SECONDS * total)
+        run.completed_at = (created_at_dt + timedelta(seconds=REVEAL_SECONDS * total)).isoformat()
         run.regression_tests = template.regression_tests
     trace_store.save_run(run)
     return run

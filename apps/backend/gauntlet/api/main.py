@@ -69,17 +69,9 @@ def start_run(body: StartRunRequest, background: BackgroundTasks) -> StartRunRes
     if _mock_mode():
         return mock.start_run(body)
 
-    run_id = trace_store.new_run_id()
     target = body.target_url or config.target_url()
-    run = RunStatus(
-        run_id=run_id,
-        policy_id=body.policy_id,
-        target_url=target,
-        status="pending",
-        created_at=_now(),
-    )
-    trace_store.save_run(run)
-    background.add_task(orchestrator.run_pipeline, run_id, body.policy_id, target)
+    run_id = finalize.start_run(body.policy_id, target)
+    background.add_task(finalize.execute_run, run_id, body.policy_id, target)
     return StartRunResponse(run_id=run_id)
 
 
@@ -126,4 +118,4 @@ def target_guard(body: GuardRequest) -> GuardResponse:
         data = resp.json()
         return GuardResponse(enabled=bool(data.get("enabled", body.enabled)))
     except Exception as exc:
-        raise HTTPException(502, f"Target agent guard toggle failed: {exc}") from exc
+        raise HTTPException(502, f"Target agent guard toggle failed ({target}): {exc}") from exc
