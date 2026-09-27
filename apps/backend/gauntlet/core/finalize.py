@@ -17,8 +17,8 @@ log = logging.getLogger(__name__)
 PIPELINE_MISSING = "pipeline not available yet (BE1)"
 
 
-def _now() -> datetime:
-    return datetime.now(timezone.utc)
+def _now() -> str:
+    return trace_store.iso(datetime.now(timezone.utc))
 
 
 def _load(run_id: str) -> RunStatus:
@@ -99,6 +99,8 @@ def execute_run(run_id: str, policy_id: str, target_url: str) -> None:
         except NotImplementedError:
             fail_run(run_id, PIPELINE_MISSING)
             return
+        if _load(run_id).status == "error":
+            return  # the pipeline recorded its own failure; keep its message
         finalize_run(run_id)
     except Exception as exc:  # noqa: BLE001 - a background task has nobody to raise to
         log.exception("Run %s failed", run_id)

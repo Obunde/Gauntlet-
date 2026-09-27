@@ -43,7 +43,7 @@ def start_run(req: StartRunRequest) -> StartRunResponse:
             policy_id=req.policy_id,
             target_url=req.target_url,
             status="running",
-            created_at=now(),
+            created_at=trace_store.iso(now()),
         )
     )
     return StartRunResponse(run_id=run_id)
@@ -56,12 +56,13 @@ def get_run(run_id: str) -> RunStatus | None:
 
     template = _template()
     total = len(template.attacks)
-    shown = min(total, int((now() - run.created_at).total_seconds() // REVEAL_SECONDS))
+    created_at = datetime.fromisoformat(run.created_at)
+    shown = min(total, int((now() - created_at).total_seconds() // REVEAL_SECONDS))
     run.attacks = [
         a.model_copy(
             update={
                 "run_id": run_id,
-                "timestamp": run.created_at + timedelta(seconds=REVEAL_SECONDS * (i + 1)),
+                "timestamp": trace_store.iso(created_at + timedelta(seconds=REVEAL_SECONDS * (i + 1))),
                 "trace_id": trace_store.make_trace_id(run.policy_id, a.prompt, run.target_url),
             }
         )
@@ -70,7 +71,7 @@ def get_run(run_id: str) -> RunStatus | None:
     if shown == total:
         run.status = "done"
         run.gate = template.gate
-        run.completed_at = run.created_at + timedelta(seconds=REVEAL_SECONDS * total)
+        run.completed_at = trace_store.iso(created_at + timedelta(seconds=REVEAL_SECONDS * total))
         run.regression_tests = template.regression_tests
     trace_store.save_run(run)
     return run
@@ -87,7 +88,7 @@ def regress(run_id: str) -> RegressionRun:
     if run.status != "done":
         raise RuntimeError(f"Run {run_id} is still {run.status}")
     rr = RegressionRun(
-        ran_at=now(),
+        ran_at=trace_store.iso(now()),
         gate="GREEN",
         results=[RegressionResult(test_id=t.test_id, passed=True) for t in run.regression_tests],
     )

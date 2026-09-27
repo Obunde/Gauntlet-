@@ -59,3 +59,14 @@ def test_stubbed_orchestrator(install_pipeline):
     install_pipeline(stub)
     run = _execute()
     assert (run.status, run.error) == ("error", finalize.PIPELINE_MISSING)
+
+
+def test_pipeline_recorded_error_is_kept(install_pipeline):
+    def records_own_error(run_id, policy_id, target_url):
+        run = trace_store.load_run(run_id)
+        run.status, run.error = "error", "target returned 500"
+        trace_store.save_run(run)
+
+    install_pipeline(records_own_error)
+    run = _execute()
+    assert (run.status, run.error) == ("error", "target returned 500")

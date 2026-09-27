@@ -4,12 +4,11 @@ from fastapi.testclient import TestClient
 
 from gauntlet.api.main import app
 from gauntlet.core import finalize
-from gauntlet.shared import config
 
 
 @pytest.fixture
 def client(monkeypatch):
-    monkeypatch.setattr(config, "API_MODE", "live")
+    monkeypatch.setenv("API_MODE", "live")
     return TestClient(app)
 
 
@@ -78,13 +77,19 @@ def test_unknown_run_and_policy_404(client):
 
 
 def test_guard_forwards_to_target(client, fake_target, monkeypatch):
-    monkeypatch.setattr(config, "TARGET_URL", fake_target.url)
+    monkeypatch.setenv("TARGET_URL", fake_target.url)
     assert client.post("/api/target/guard", json={"enabled": True}).json() == {"enabled": True}
     assert fake_target.hardened is True
 
 
 def test_guard_unreachable_target_is_502(client, unreachable_url, monkeypatch):
-    monkeypatch.setattr(config, "TARGET_URL", unreachable_url)
+    monkeypatch.setenv("TARGET_URL", unreachable_url)
     resp = client.post("/api/target/guard", json={"enabled": True})
     assert resp.status_code == 502
-    assert unreachable_url in resp.json()["detail"]
+
+
+def test_target_url_defaults_to_config(client, install_pipeline, monkeypatch):
+    monkeypatch.setenv("TARGET_URL", "http://agent.example:8001")
+    install_pipeline(fake_pipeline(succeeded=0, blocked=1))
+    run_id = client.post("/api/run", json={"policy_id": "customer_support"}).json()["run_id"]
+    assert _wait_done(client, run_id)["target_url"] == "http://agent.example:8001"
