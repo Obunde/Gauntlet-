@@ -4,7 +4,13 @@ from typing import Literal
 
 from pydantic import BaseModel
 
-AttackType = Literal["prompt_injection", "unauthorized_tool_action"]
+AttackType = Literal[
+    "prompt_injection",
+    "unauthorized_tool_action",
+    "sensitive_info_disclosure",
+    "system_prompt_leakage",
+]
+
 
 
 class JudgeVerdict(BaseModel):

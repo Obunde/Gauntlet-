@@ -7,7 +7,13 @@ from gauntlet.shared import config
 from gauntlet.shared.schemas import Policy
 
 log = logging.getLogger(__name__)
-VALID_TYPES = {"prompt_injection", "unauthorized_tool_action"}
+VALID_TYPES = {
+    "prompt_injection",
+    "unauthorized_tool_action",
+    "sensitive_info_disclosure",
+    "system_prompt_leakage",
+}
+
 
 
 def load_fallback_attacks(n: int = 10) -> list[dict]:
